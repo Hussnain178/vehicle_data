@@ -1,4 +1,4 @@
-from scrapper import autoscout24_final, mobile_de_final, autoscout24_hourly, mobile_de_hourly
+from scrapper import autoscout24_complete, autoscout24_recent, mobile_de_complete, mobile_de_recent
 from database.create_database import ensure_database_exists
 import sys
 
@@ -7,12 +7,12 @@ if __name__ == '__main__':
     ensure_database_exists()
     # arguments = ['mobile']
     if arguments[0] == 'autoscout24':
-        autoscout24_final.main()
+        autoscout24_complete.main()
     elif arguments[0] == 'mobile':
-        mobile_de_final.main()
+        mobile_de_complete.main()
     elif arguments[0] == 'autoscout24_hourly':
-        autoscout24_hourly.main()
+        autoscout24_recent.main()
     elif arguments[0] == 'mobile_hourly':
-        mobile_de_hourly.main()
+        mobile_de_recent.main()
     else:
         print('Available launcher names are: \n- autoscout24\n- mobile\n- autoscout24_hourly\n- mobile_hourly')
