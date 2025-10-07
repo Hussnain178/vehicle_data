@@ -64,6 +64,13 @@ pip install -r requirements.txt
 Inside your project, open the **.env** or **constants.env** file and update PostgreSQL credentials:
 
 ```bash
+SCRAPE_DO_TOKEN=SCRAPE_DO_TOKEN
+
+WEBSHARE_PROXY_USER=WEBSHARE_PROXY_USER
+WEBSHARE_PROXY_PASSWORD=WEBSHARE_PROXY_PASSWORD
+WEBSHARE_PROXY_HOST=WEBSHARE_PROXY_HOST
+WEBSHARE_PROXY_PORT=WEBSHARE_PROXY_PORT
+
 DB_NAME=vehicles_db
 DB_USER=postgres
 DB_PASSWORD=yourpassword
@@ -84,7 +91,7 @@ The project uses a **launcher system** via `main.py`. You can run any scraper by
 ### ▶️ AutoScout24 Daily Scraper
 Runs a full scrape of all listings:
 ```bash
-python main.py autoscout24
+python main.py autoscout24_complete
 ```
 
 ---
@@ -92,35 +99,35 @@ python main.py autoscout24
 ### ▶️ Mobile.de Daily Scraper
 Runs a full scrape of all listings:
 ```bash
-python main.py mobile
+python main.py mobile_complete
 ```
 
 ---
 
 ### ⏱ AutoScout24 Hourly Scraper
-Scrapes new or updated listings every hour:
+Scrapes new:
 ```bash
-python main.py autoscout24_hourly
+python main.py autoscout24_recent
 ```
 
 ---
 
 ### ⏱ Mobile.de Hourly Scraper
-Scrapes new or updated listings every hour:
+Scrapes new :
 ```bash
-python main.py mobile_hourly
+python main.py mobile_recent
 ```
 
 ---
 
 ## ✅ Available Launchers
 
-| Command                | Description                            |
-|------------------------|----------------------------------------|
-| `autoscout24`          | Run full scraper for AutoScout24       |
-| `mobile`               | Run full scraper for Mobile.de         |
-| `autoscout24_hourly`   | Run hourly scraper for AutoScout24     |
-| `mobile_hourly`        | Run hourly scraper for Mobile.de       |
+| Command                | Description                                          |
+|------------------------|------------------------------------------------------|
+| `autoscout24_complete`          | Run scraper for AutoScout24 to extract complete data |
+| `mobile_complete`               | Run scraper for Mobile.de to extract complete data   |
+| `autoscout24_recent`   | Run scraper for AutoScout24 to extract recent data   |
+| `mobile_recent`        | Run scraper for Mobile.de to extract recent data     |
 
 ---
 
@@ -128,23 +135,25 @@ python main.py mobile_hourly
 
 Here’s the main entry script:
 ```python
-from scrapper import autoscout24_final, mobile_de_final, autoscout24_hourly, mobile_de_hourly
-from database.create_database import ensure_database_exists
+from scrapper import autoscout24_complete, autoscout24_recent, mobile_de_complete, mobile_de_recent
+from database.db import ensure_database_exists
 import sys
 
 if __name__ == '__main__':
     arguments = sys.argv[1:]
     ensure_database_exists()
-    if arguments[0] == 'autoscout24':
-        autoscout24_final.main()
-    elif arguments[0] == 'mobile':
-        mobile_de_final.main()
-    elif arguments[0] == 'autoscout24_hourly':
-        autoscout24_hourly.main()
-    elif arguments[0] == 'mobile_hourly':
-        mobile_de_hourly.main()
+    # arguments = ['mobile']
+    if arguments[0] == 'autoscout24_complete':
+        autoscout24_complete.main()
+    elif arguments[0] == 'mobile_complete':
+        mobile_de_complete.main()
+    elif arguments[0] == 'autoscout24_recent':
+        autoscout24_recent.main()
+    elif arguments[0] == 'mobile_recent':
+        mobile_de_recent.main()
     else:
-        print('Available launcher names are: \n- autoscout24\n- mobile\n- autoscout24_hourly\n- mobile_hourly')
+        print('Available launcher names are: \n- autoscout24_complete\n- mobile_complete\n- autoscout24_recent\n- mobile_recent')
+
 ```
 
 ---

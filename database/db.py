@@ -445,35 +445,19 @@ class VehicleDatabase:
             print(f"ERROR: Failed to close connections: {e}")
 
 
-# Example usage
-if __name__ == "__main__":
-    # Initialize database
-    db = VehicleDatabase(schema_name="vehicle_marketplace", table_name="vehicle_data")
+def ensure_database_exists(dbname=Config.DATABASE_NAME, user=Config.DATABASE_USER, password=Config.DATABASE_PASSWORD,
+                           host=Config.DATABASE_HOST, port=Config.DATABASE_PORT):
+    # Connect to default 'postgres' DB to create new one if missing
+    conn = psycopg2.connect(dbname='postgres', user=user, password=password, host=host, port=port)
+    conn.autocommit = True
+    cur = conn.cursor()
 
-    # Example vehicle data
-    vehicle_data = {
-        'vehicle_id': 'VEH123456',
-        'data_source': 'AutoTrader',
-        'make': 'Toyota',
-        'model': 'Camry',
-        'price': '25000',
-        'mileage_km': '50000',
-        'fuel_type': 'Petrol',
-        'abs': True,
-        'airbag': 'Multiple',
-        'air_conditioning': True
-    }
+    cur.execute(sql.SQL("SELECT 1 FROM pg_database WHERE datname = %s"), [dbname])
+    exists = cur.fetchone()
 
-    # Check if exists
-    exists = db.check_id_exists(vehicle_data['vehicle_id'], vehicle_data['data_source'])
-    print(f"Vehicle exists: {exists}")
-
-    # Insert vehicle
     if not exists:
-        success = db.insert_vehicle(vehicle_data)
-        print(f"Insertion result: {success}")
-    else:
-        print("Vehicle already exists, skipping insertion")
+        cur.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(dbname)))
+        print(f"✅ Database '{dbname}' created successfully!")
 
-    # Close connections when done
-    db.close()
+    cur.close()
+    conn.close()
