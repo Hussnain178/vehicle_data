@@ -37,21 +37,10 @@ This command will execute the `mobile_de_final` scraper and start collecting dat
 
 ---
 
-### 4. Combine Both Scraped Files
-After both scrapers have finished, you can combine their results into a single dataset by running:
-
-```bash
-python main.py combine
-```
-
-This command will execute the `combine_data()` function from `utils/combined_data.py` to merge both scraped files.
-
----
 
 ✅ **Available launcher names**:
 - `autoscout24`
 - `mobile`
-- `combine`
 
 Example:
 ```bash

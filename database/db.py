@@ -1,16 +1,8 @@
 import psycopg2
-from psycopg2 import pool, sql, extras
+from psycopg2 import pool, sql
 import threading
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 from configuration.config import Config
-
-
-# class Config:
-#     DATABASE_NAME = "your_database_name"
-#     DATABASE_HOST = "localhost"
-#     DATABASE_PORT = 5432
-#     DATABASE_USER = "your_username"
-#     DATABASE_PASSWORD = "your_password"
 
 
 class VehicleDatabase:
@@ -313,56 +305,6 @@ class VehicleDatabase:
                 cursor.close()
             if conn:
                 self._put_connection(conn)
-
-    # def create_indexes(self):
-    #     """Create indexes on important columns."""
-    #     conn = None
-    #     cursor = None
-    #     try:
-    #         conn = self._get_connection()
-    #         cursor = conn.cursor()
-    #
-    #         # Create index on unique_id (primary key already has index)
-    #         # Create index on vehicle_id for faster lookups
-    #         index_queries = [
-    #             sql.SQL("CREATE INDEX IF NOT EXISTS idx_{}_vehicle_id ON {}.{} (vehicle_id)").format(
-    #                 sql.Identifier(self.table_name),
-    #                 sql.Identifier(self.schema_name),
-    #                 sql.Identifier(self.table_name)
-    #             ),
-    #             sql.SQL("CREATE INDEX IF NOT EXISTS idx_{}_data_source ON {}.{} (data_source)").format(
-    #                 sql.Identifier(self.table_name),
-    #                 sql.Identifier(self.schema_name),
-    #                 sql.Identifier(self.table_name)
-    #             ),
-    #             sql.SQL("CREATE INDEX IF NOT EXISTS idx_{}_data_source ON {}.{} (listing_url)").format(
-    #                 sql.Identifier(self.table_name),
-    #                 sql.Identifier(self.schema_name),
-    #                 sql.Identifier(self.table_name)
-    #             ),
-    #             sql.SQL("CREATE INDEX IF NOT EXISTS idx_{}_created_at ON {}.{} (created_at)").format(
-    #                 sql.Identifier(self.table_name),
-    #                 sql.Identifier(self.schema_name),
-    #                 sql.Identifier(self.table_name)
-    #             )
-    #         ]
-    #
-    #         for query in index_queries:
-    #             cursor.execute(query)
-    #
-    #         conn.commit()
-    #         print("Indexes created successfully")
-    #
-    #     except Exception as e:
-    #         print(f"ERROR: Failed to create indexes: {e}")
-    #         if conn:
-    #             conn.rollback()
-    #         raise
-    #     finally:
-    #         if cursor:
-    #             cursor.close()
-    #         if conn:
-    #             self._put_connection(conn)
 
     def generate_unique_id(self, vehicle_id: str, data_source: str) -> str:
         """

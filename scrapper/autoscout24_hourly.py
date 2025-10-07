@@ -3,7 +3,6 @@ from typing import List, Dict, Any, Optional
 import json
 import requests
 from bs4 import BeautifulSoup
-from scrapy import Selector
 from dataclasses import dataclass
 from datetime import datetime
 from utils.key_mapping import convert_vehicle_data
@@ -108,17 +107,36 @@ class AutoScout24HourlyScraper:
         return None
 
     def get_detail_response(self, url: str) -> Optional[Dict[str, Any]]:
-        """Get product detail page"""
+        """Get product detail page and extract JSON (__NEXT_DATA__) using BeautifulSoup"""
         response = self._make_request(url, is_pagination=False)
 
-        if response:
-            try:
-                json_data = Selector(text=response.text).css('#__NEXT_DATA__::text').get('{}')
-                return json.loads(json_data)
-            except Exception as e:
-                print(f"❌ Error parsing detail page: {str(e)[:100]}")
+        if not response:
+            return None
+
+        try:
+            soup = BeautifulSoup(response.text, "html.parser")
+
+            # Find the <script> tag with id="__NEXT_DATA__"
+            script_tag = soup.find("script", id="__NEXT_DATA__")
+            if not script_tag:
+                print("⚠️ No <script id='__NEXT_DATA__'> found on page")
                 return None
-        return None
+
+            # Get the script content
+            script_content = script_tag.string or script_tag.get_text()
+            if not script_content:
+                print("⚠️ Script tag found but content is empty")
+                return None
+
+            # Parse JSON
+            return json.loads(script_content)
+
+        except json.JSONDecodeError as e:
+            print(f"❌ JSON decode error: {str(e)[:100]}")
+            return None
+        except Exception as e:
+            print(f"❌ Error parsing detail page: {str(e)[:100]}")
+            return None
 
     def parse_listing(self, data: dict) -> dict:
         """Parse individual listing data"""
@@ -222,7 +240,7 @@ class AutoScout24HourlyScraper:
                 description = product_response['props']['pageProps']['listingDetails']['description']
                 if description:
                     soup = BeautifulSoup(description, "html.parser")
-                    clean_text = soup.get_text(separator="\n").strip()
+                    clean_text = soup.get_text().strip()
                     basic_data['description'] = clean_text
                 else:
                     basic_data['description'] = ''

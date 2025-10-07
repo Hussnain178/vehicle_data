@@ -1,6 +1,5 @@
 import time
 from typing import List, Dict, Any, Optional
-from scrapy import Selector
 import json
 from urllib.parse import urlencode, quote
 import requests
@@ -109,23 +108,43 @@ class MobileDeHourlyScraper:
         return None
 
     def _extract_json_from_html(self, html_text: str) -> Optional[Dict[str, Any]]:
-        """Extract JSON data from HTML response"""
+        """Extract JSON data (window.__INITIAL_STATE__) from HTML response using BeautifulSoup"""
         try:
-            selector = Selector(text=html_text)
-            script_texts = selector.css('script::text').getall()
+            soup = BeautifulSoup(html_text, "html.parser")
+            scripts = soup.find_all("script")
 
-            for script in script_texts:
-                if '__INITIAL_STATE__' in script:
-                    json_str = script.split('window.__PUBLIC_CONFIG__')[0]
-                    json_str = json_str.replace('window.__INITIAL_STATE__ =', '').strip()
-                    return json.loads(json_str)
+            for script in scripts:
+                # Get script content safely
+                script_content = script.string or script.get_text()
+                if not script_content:
+                    continue
+
+                # Check for the target variable
+                if '__INITIAL_STATE__' in script_content:
+                    # Extract JSON part before PUBLIC_CONFIG (if present)
+                    if 'window.__PUBLIC_CONFIG__' in script_content:
+                        json_str = script_content.split('window.__PUBLIC_CONFIG__')[0]
+                    else:
+                        json_str = script_content
+
+                    # Clean prefix and trailing semicolon
+                    json_str = (
+                        json_str.replace('window.__INITIAL_STATE__ =', '')
+                        .strip()
+                        .rstrip(';')
+                        .strip()
+                    )
+
+                    try:
+                        data = json.loads(json_str)
+                        return data
+                    except json.JSONDecodeError as e:
+                        print(f"❌ JSON decode error: {str(e)[:100]}")
+                        return None
 
             print("⚠️  No __INITIAL_STATE__ found in HTML")
             return None
 
-        except json.JSONDecodeError as e:
-            print(f"❌ JSON decode error: {str(e)[:100]}")
-            return None
         except Exception as e:
             print(f"❌ Error extracting JSON: {str(e)[:100]}")
             return None
@@ -221,7 +240,7 @@ class MobileDeHourlyScraper:
             html_desc = ad_data.get('htmlDescription', '')
             if html_desc:
                 soup = BeautifulSoup(html_desc, "html.parser")
-                basic_data['description'] = soup.get_text(separator="\n").strip()
+                basic_data['description'] = soup.get_text().strip()
             else:
                 basic_data['description'] = ''
 
