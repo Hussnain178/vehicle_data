@@ -9,7 +9,7 @@ from utils.filters import *
 import threading
 from proxies.webshare import WEBSHARE
 from database.db import VehicleDatabase
-
+from logger.logger_setup import LoggerSetup
 
 @dataclass
 class ScraperConfig:
@@ -41,10 +41,11 @@ class AutoScout24Scraper:
         """Initialize scraper with configuration"""
         self.config = config or ScraperConfig()
         self.stats = ScraperStats()
+        self.log = LoggerSetup("autoscout24_complete.log").get_logger()
         self.webshare_obj = WEBSHARE()
         self.unique_features = autoscout24_features
         self.autoscout24_car_filters = autoscout24_car_filters
-        self.db_obj = VehicleDatabase()
+        self.db_obj = VehicleDatabase(logger=self.log)
 
     def _make_request(self, url: str, params: Optional[Dict[str, Any]] = None,
                       is_pagination: bool = False) -> Optional[requests.Response]:
@@ -84,14 +85,14 @@ class AutoScout24Scraper:
                 if response.status_code == 200:
                     return response
                 else:
-                    print(f"⚠️  HTTP {response.status_code} on attempt {attempt + 1}/{self.config.max_retries}")
+                    self.log.warning(f"⚠️  HTTP {response.status_code} on attempt {attempt + 1}/{self.config.max_retries}")
 
             except requests.exceptions.Timeout:
-                print(f"⏱️  Timeout on attempt {attempt + 1}/{self.config.max_retries}")
+                self.log.error(f"⏱️  Timeout on attempt {attempt + 1}/{self.config.max_retries}")
             except requests.exceptions.ConnectionError:
-                print(f"🔌 Connection error on attempt {attempt + 1}/{self.config.max_retries}")
+                self.log.error(f"🔌 Connection error on attempt {attempt + 1}/{self.config.max_retries}")
             except Exception as e:
-                print(f"❌ Error on attempt {attempt + 1}/{self.config.max_retries}: {str(e)[:100]}")
+                self.log.error(f"❌ Error on attempt {attempt + 1}/{self.config.max_retries}: {str(e)[:100]}")
 
             if attempt < self.config.max_retries - 1:
                 time.sleep(2 ** attempt)  # Exponential backoff
@@ -107,7 +108,7 @@ class AutoScout24Scraper:
             try:
                 return response.json()
             except json.JSONDecodeError:
-                print("❌ Failed to parse JSON response")
+                self.log.error("❌ Failed to parse JSON response")
                 return None
         return None
 
@@ -124,23 +125,23 @@ class AutoScout24Scraper:
             # Find the <script> tag with id="__NEXT_DATA__"
             script_tag = soup.find("script", id="__NEXT_DATA__")
             if not script_tag:
-                print("⚠️ No <script id='__NEXT_DATA__'> found on page")
+                self.log.info("⚠️ No <script id='__NEXT_DATA__'> found on page")
                 return None
 
             # Get the script content
             script_content = script_tag.string or script_tag.get_text()
             if not script_content:
-                print("⚠️ Script tag found but content is empty")
+                self.log.warning("⚠️ Script tag found but content is empty")
                 return None
 
             # Parse JSON
             return json.loads(script_content)
 
         except json.JSONDecodeError as e:
-            print(f"❌ JSON decode error: {str(e)[:100]}")
+            self.log.error(f"❌ JSON decode error: {str(e)[:100]}")
             return None
         except Exception as e:
-            print(f"❌ Error parsing detail page: {str(e)[:100]}")
+            self.log.error(f"❌ Error parsing detail page: {str(e)[:100]}")
             return None
 
     def generate_price_ranges(self) -> List[Tuple[int, int]]:
@@ -157,7 +158,7 @@ class AutoScout24Scraper:
         range_size = end - start
 
         if range_size <= 1:
-            print(f"⚠️  Cannot split range further: ({start}, {end})")
+            self.log.info(f"⚠️  Cannot split range further: ({start}, {end})")
             return [price_range]
 
         # Calculate chunks with 20% buffer
@@ -170,7 +171,7 @@ class AutoScout24Scraper:
             if i < chunk_end:
                 new_ranges.append((i, chunk_end))
 
-        print(f"📊 Split range ({start}, {end}) with {num_results} results into {len(new_ranges)} chunks")
+        self.log.info(f"📊 Split range ({start}, {end}) with {num_results} results into {len(new_ranges)} chunks")
         return new_ranges
 
     def parse_listing(self, data: dict) -> dict:
@@ -245,7 +246,7 @@ class AutoScout24Scraper:
 
             return parsed
         except Exception as e:
-            print(f"❌ Error parsing listing: {e}")
+            self.log.error(f"❌ Error parsing listing: {e}")
             return {}
 
     def parse_detail_listing(self, basic_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -254,7 +255,7 @@ class AutoScout24Scraper:
 
         # Check for duplicate
         if self.db_obj.check_id_exists(listing_id, 'autoscout24'):
-            print(f"⏭️  Skipping duplicate ID: {listing_id}")
+            self.log.info(f"⏭️  Skipping duplicate ID: {listing_id}")
             self.stats.duplicates_skipped += 1
             return None
 
@@ -266,7 +267,7 @@ class AutoScout24Scraper:
             product_response = self.get_detail_response(url)
 
             if not product_response:
-                print(f"⚠️  Failed to get details for: {url}")
+                self.log.info(f"⚠️  Failed to get details for: {url}")
                 return basic_data
 
             # Extract description
@@ -330,11 +331,11 @@ class AutoScout24Scraper:
                 pass
 
             basic_data.update(new_data)
-            print(f"✅ Parsed: {basic_data.get('url', 'Unknown')[:50]} - €{basic_data.get('price', 'N/A')}")
+            self.log.info(f"✅ Parsed: {basic_data.get('url', 'Unknown')[:50]} - €{basic_data.get('price', 'N/A')}")
             return basic_data
 
         except Exception as e:
-            print(f"❌ Error parsing details for {basic_data.get('url', 'Unknown')}: {str(e)[:100]}")
+            self.log.error(f"❌ Error parsing details for {basic_data.get('url', 'Unknown')}: {str(e)[:100]}")
             return basic_data
 
 
@@ -366,7 +367,7 @@ class AutoScout24Scraper:
 
 
             except Exception as e:
-                print(f"❌ Error processing listing: {e}")
+                self.log.error(f"❌ Error processing listing: {e}")
 
         # 🔹 Create and start threads
         for listing in listings:
@@ -381,8 +382,8 @@ class AutoScout24Scraper:
     def process_price_range(self, price_range: Tuple[int, int],
                             extra_params: Optional[Dict[str, Any]] = None) -> None:
         """Process a single price range with dynamic chunking"""
-        print(f"\n{'=' * 60}")
-        print(f"💰 Processing price range: €{price_range[0]} - €{price_range[1]}")
+        self.log.info(f"\n{'=' * 60}")
+        self.log.info(f"💰 Processing price range: €{price_range[0]} - €{price_range[1]}")
 
         # Build search parameters
         params = {
@@ -409,31 +410,31 @@ class AutoScout24Scraper:
         response = self.get_pagination_response(url, params)
 
         if not response or 'pageProps' not in response:
-            print(f"❌ Failed to get response for range {price_range}")
+            self.log.info(f"❌ Failed to get response for range {price_range}")
             return
 
         page_props = response['pageProps']
         num_results = page_props.get('numberOfResults', 0)
 
-        print(f"📈 Found {num_results} results")
+        self.log.info(f"📈 Found {num_results} results")
 
         if num_results == 0:
-            print("⏭️  No results, skipping range")
+            self.log.info("⏭️  No results, skipping range")
             return
 
         # Handle range splitting if needed
         if num_results > self.config.max_results_per_range and not extra_params:
             if price_range[1] - price_range[0] == 1:
-                print(f"🔄 Single price point with {num_results} results, trying brand filters")
+                self.log.info(f"🔄 Single price point with {num_results} results, trying brand filters")
                 for car_filter in self.autoscout24_car_filters:
                     brand_name = list(car_filter.keys())[0]
                     brand_id = list(car_filter.values())[0]
                     filter_params = {"mmmv": f'{brand_id}|||'}
-                    print(f"Fetching info for {brand_name} with range {price_range}")
+                    self.log.info(f"Fetching info for {brand_name} with range {price_range}")
                     self.process_price_range(price_range, filter_params)
                 return
 
-            print(f"⚠️  Too many results ({num_results}), splitting range...")
+            self.log.info(f"⚠️  Too many results ({num_results}), splitting range...")
             sub_ranges = self.split_range_dynamically(price_range, num_results)
 
             for sub_range in sub_ranges:
@@ -442,10 +443,10 @@ class AutoScout24Scraper:
 
         # Process all pages
         num_pages = page_props.get('numberOfPages', 1)
-        print(f"📄 Processing {num_pages} page(s)")
+        self.log.info(f"📄 Processing {num_pages} page(s)")
 
         for page in range(1, num_pages + 1):
-            print(f"  📖 Page {page}/{num_pages}")
+            self.log.info(f"  📖 Page {page}/{num_pages}")
 
             if page == 1:
                 current_response = response
@@ -454,58 +455,58 @@ class AutoScout24Scraper:
                 current_response = self.get_pagination_response(url, params)
 
             if not current_response or 'pageProps' not in current_response:
-                print(f"  ⚠️  Failed to get page {page}")
+                self.log.info(f"  ⚠️  Failed to get page {page}")
                 continue
 
             # Extract listings
             listings = current_response['pageProps'].get('listings', [])
             self.process_listings(listings)
             self.stats.pages_processed += 1
-            print(f"  ✅ Parsed {self.stats.list_process_per_page} listings (Total: {self.stats.total_listings})")
+            self.log.info(f"  ✅ Parsed {self.stats.list_process_per_page} listings (Total: {self.stats.total_listings})")
             self.stats.list_process_per_page = 0
 
         self.stats.ranges_processed += 1
 
     def run(self):
         """Main execution method"""
-        print("🚀 Starting AutoScout24 scraping...")
-        print(f"⚙️  Config: €{self.config.price_start}-€{self.config.price_end}, "
+        self.log.info("🚀 Starting AutoScout24 scraping...")
+        self.log.info(f"⚙️  Config: €{self.config.price_start}-€{self.config.price_end}, "
               f"chunk size: €{self.config.initial_chunk_size}")
 
         start_time = time.time()
         price_ranges = self.generate_price_ranges()
 
-        print(f"📊 Generated {len(price_ranges)} initial price ranges")
+        self.log.info(f"📊 Generated {len(price_ranges)} initial price ranges")
 
         for i, price_range in enumerate(price_ranges, 1):
             try:
-                print(f"\n{'#' * 60}")
-                print(f"Range {i}/{len(price_ranges)}")
+                self.log.info(f"\n{'#' * 60}")
+                self.log.info(f"Range {i}/{len(price_ranges)}")
                 self.process_price_range(price_range)
 
             except KeyboardInterrupt:
-                print("\n\n⚠️  Scraping interrupted by user")
+                self.log.error("\n\n⚠️  Scraping interrupted by user")
                 break
             except Exception as e:
-                print(f"❌ Error processing range {price_range}: {str(e)[:200]}")
+                self.log.error(f"❌ Error processing range {price_range}: {str(e)[:200]}")
                 continue
 
         elapsed_time = time.time() - start_time
 
-        # Print final statistics
-        print(f"\n{'=' * 60}")
-        print("📊 SCRAPING COMPLETED")
-        print(f"{'=' * 60}")
-        print(f"✅ Total listings collected: {self.stats.total_listings}")
-        print(f"⏭️  Duplicates skipped: {self.stats.duplicates_skipped}")
-        print(f"📄 Pages processed: {self.stats.pages_processed}")
-        print(f"📦 Ranges processed: {self.stats.ranges_processed}")
-        print(f"🌐 Total requests: {self.stats.total_requests}")
-        print(f"❌ Failed requests: {self.stats.failed_requests}")
-        print(f"⏱️  Time elapsed: {elapsed_time:.2f} seconds")
+        # self.log. final statistics
+        self.log.info(f"\n{'=' * 60}")
+        self.log.info("📊 SCRAPING COMPLETED")
+        self.log.info(f"{'=' * 60}")
+        self.log.info(f"✅ Total listings collected: {self.stats.total_listings}")
+        self.log.info(f"⏭️  Duplicates skipped: {self.stats.duplicates_skipped}")
+        self.log.info(f"📄 Pages processed: {self.stats.pages_processed}")
+        self.log.info(f"📦 Ranges processed: {self.stats.ranges_processed}")
+        self.log.info(f"🌐 Total requests: {self.stats.total_requests}")
+        self.log.info(f"❌ Failed requests: {self.stats.failed_requests}")
+        self.log.info(f"⏱️  Time elapsed: {elapsed_time:.2f} seconds")
         if elapsed_time > 0:
-            print(f"⚡ Average: {self.stats.total_listings / elapsed_time:.2f} listings/sec")
-        print(f"{'=' * 60}")
+            self.log.info(f"⚡ Average: {self.stats.total_listings / elapsed_time:.2f} listings/sec")
+        self.log.info(f"{'=' * 60}")
 
 
 def main():

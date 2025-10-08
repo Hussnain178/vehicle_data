@@ -10,6 +10,7 @@ from utils.filters import *
 import threading
 from proxies.webshare import WEBSHARE
 from database.db import VehicleDatabase
+from logger.logger_setup import LoggerSetup
 
 
 @dataclass
@@ -39,9 +40,10 @@ class AutoScout24HourlyScraper:
         """Initialize scraper with configuration"""
         self.config = config or ScraperConfig()
         self.stats = ScraperStats()
+        self.log = LoggerSetup("autoscout24_recent.log").get_logger()
         self.webshare_obj = WEBSHARE()
         self.unique_features = autoscout24_features
-        self.db_obj = VehicleDatabase()
+        self.db_obj = VehicleDatabase(logger=self.log)
 
     def _make_request(self, url: str, params: Optional[Dict[str, Any]] = None,
                       is_pagination: bool = False) -> Optional[requests.Response]:
@@ -79,14 +81,14 @@ class AutoScout24HourlyScraper:
                 if response.status_code == 200:
                     return response
                 else:
-                    print(f"⚠️  HTTP {response.status_code} on attempt {attempt + 1}/{self.config.max_retries}")
+                    self.log.info(f"⚠️  HTTP {response.status_code} on attempt {attempt + 1}/{self.config.max_retries}")
 
             except requests.exceptions.Timeout:
-                print(f"⏱️  Timeout on attempt {attempt + 1}/{self.config.max_retries}")
+                self.log.error(f"⏱️  Timeout on attempt {attempt + 1}/{self.config.max_retries}")
             except requests.exceptions.ConnectionError:
-                print(f"🔌 Connection error on attempt {attempt + 1}/{self.config.max_retries}")
+                self.log.error(f"🔌 Connection error on attempt {attempt + 1}/{self.config.max_retries}")
             except Exception as e:
-                print(f"❌ Error on attempt {attempt + 1}/{self.config.max_retries}: {str(e)[:100]}")
+                self.log.error(f"❌ Error on attempt {attempt + 1}/{self.config.max_retries}: {str(e)[:100]}")
 
             if attempt < self.config.max_retries - 1:
                 time.sleep(2 ** attempt)  # Exponential backoff
@@ -102,7 +104,7 @@ class AutoScout24HourlyScraper:
             try:
                 return response.json()
             except json.JSONDecodeError:
-                print("❌ Failed to parse JSON response")
+                self.log.error("❌ Failed to parse JSON response")
                 return None
         return None
 
@@ -119,23 +121,23 @@ class AutoScout24HourlyScraper:
             # Find the <script> tag with id="__NEXT_DATA__"
             script_tag = soup.find("script", id="__NEXT_DATA__")
             if not script_tag:
-                print("⚠️ No <script id='__NEXT_DATA__'> found on page")
+                self.log.info("⚠️ No <script id='__NEXT_DATA__'> found on page")
                 return None
 
             # Get the script content
             script_content = script_tag.string or script_tag.get_text()
             if not script_content:
-                print("⚠️ Script tag found but content is empty")
+                self.log.info("⚠️ Script tag found but content is empty")
                 return None
 
             # Parse JSON
             return json.loads(script_content)
 
         except json.JSONDecodeError as e:
-            print(f"❌ JSON decode error: {str(e)[:100]}")
+            self.log.error(f"❌ JSON decode error: {str(e)[:100]}")
             return None
         except Exception as e:
-            print(f"❌ Error parsing detail page: {str(e)[:100]}")
+            self.log.error(f"❌ Error parsing detail page: {str(e)[:100]}")
             return None
 
     def parse_listing(self, data: dict) -> dict:
@@ -211,7 +213,7 @@ class AutoScout24HourlyScraper:
 
             return parsed
         except Exception as e:
-            print(f"❌ Error parsing listing: {e}")
+            self.log.error(f"❌ Error parsing listing: {e}")
             return {}
 
     def parse_detail_listing(self, basic_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -220,7 +222,7 @@ class AutoScout24HourlyScraper:
 
         # Check for duplicate
         if self.db_obj.check_id_exists(listing_id, 'autoscout24'):
-            print(f"⏭️  Skipping duplicate ID: {listing_id}")
+            self.log.info(f"⏭️  Skipping duplicate ID: {listing_id}")
             self.stats.duplicates_skipped += 1
             return None
 
@@ -232,7 +234,7 @@ class AutoScout24HourlyScraper:
             product_response = self.get_detail_response(url)
 
             if not product_response:
-                print(f"⚠️  Failed to get details for: {url}")
+                self.log.info(f"⚠️  Failed to get details for: {url}")
                 return basic_data
 
             # Extract description
@@ -303,11 +305,11 @@ class AutoScout24HourlyScraper:
                 pass
 
             basic_data.update(new_data)
-            print(f"✅ Parsed: {basic_data.get('url', 'Unknown')[:50]} - €{basic_data.get('price', 'N/A')}")
+            self.log.info(f"✅ Parsed: {basic_data.get('url', 'Unknown')[:50]} - €{basic_data.get('price', 'N/A')}")
             return basic_data
 
         except Exception as e:
-            print(f"❌ Error parsing details for {basic_data.get('url', 'Unknown')}: {str(e)[:100]}")
+            self.log.error(f"❌ Error parsing details for {basic_data.get('url', 'Unknown')}: {str(e)[:100]}")
             return basic_data
 
     def process_listings(self, listings: List[Dict[str, Any]]):
@@ -338,7 +340,7 @@ class AutoScout24HourlyScraper:
                     self.stats.list_process_per_page += 1
 
             except Exception as e:
-                print(f"❌ Error processing listing: {e}")
+                self.log.error(f"❌ Error processing listing: {e}")
 
         # Create and start threads
         for listing in listings:
@@ -352,21 +354,20 @@ class AutoScout24HourlyScraper:
 
     def run(self):
         """Main execution method - fetch latest listings sorted by age"""
-        print("🚀 Starting AutoScout24 hourly scraping...")
-        print(f"⚙️  Config: Max {self.config.max_pages} pages, sorted by age")
+        self.log.info("🚀 Starting AutoScout24 hourly scraping...")
+        self.log.info(f"⚙️  Config: Max {self.config.max_pages} pages, sorted by age")
 
         start_time = time.time()
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f"🕐 Run timestamp: {timestamp}")
+        self.log.info(f"🕐 Run timestamp: {timestamp}")
 
         url = "https://www.autoscout24.de/_next/data/as24-search-funnel_main-20250924171425/lst.json"
         page_number = 1
-        total_fetched = 0
 
         try:
             while page_number < self.config.max_pages:
-                print(f"\n{'=' * 60}")
-                print(f"📖 Processing page {page_number}")
+                self.log.info(f"\n{'=' * 60}")
+                self.log.info(f"📖 Processing page {page_number}")
 
                 # Build search parameters
                 params = {
@@ -386,7 +387,7 @@ class AutoScout24HourlyScraper:
                 response = self.get_pagination_response(url, params)
 
                 if not response or 'pageProps' not in response:
-                    print(f"❌ Failed to get response for page {page_number}")
+                    self.log.info(f"❌ Failed to get response for page {page_number}")
                     break
 
                 page_props = response['pageProps']
@@ -394,23 +395,23 @@ class AutoScout24HourlyScraper:
                 num_pages = page_props.get('numberOfPages', 0)
 
                 if page_number == 1:
-                    print(f"📈 Total results available: {num_results}")
-                    print(f"📄 Total pages available: {num_pages}")
+                    self.log.info(f"📈 Total results available: {num_results}")
+                    self.log.info(f"📄 Total pages available: {num_pages}")
 
                 # Extract listings
                 listings = page_props.get('listings', [])
 
                 if not listings:
-                    print("⚠️  No listings found on this page")
+                    self.log.info("⚠️  No listings found on this page")
                     break
 
-                print(f"🔄 Processing {len(listings)} listings from this page")
+                self.log.info(f"🔄 Processing {len(listings)} listings from this page")
 
                 # Process listings
                 self.process_listings(listings)
                 self.stats.pages_processed += 1
 
-                print(f"✅ Parsed {self.stats.list_process_per_page} listings (Total: {self.stats.total_listings})")
+                self.log.info(f"✅ Parsed {self.stats.list_process_per_page} listings (Total: {self.stats.total_listings})")
                 if self.stats.list_process_per_page == 0:
                     self.stats.consective_no_data_page_count += 1
                 else:
@@ -418,11 +419,11 @@ class AutoScout24HourlyScraper:
                     self.stats.consective_no_data_page_count = 0
 
                 if self.stats.consective_no_data_page_count == 3:
-                    print(f"📄 Three pages have no New data Stopping script!")
+                    self.log.info(f"📄 Three pages have no New data Stopping script!")
                     break
 
                 if page_number >= num_pages:
-                    print(f"📄 Reached last page ({num_pages})")
+                    self.log.info(f"📄 Reached last page ({num_pages})")
                     break
 
                 page_number += 1
@@ -431,25 +432,25 @@ class AutoScout24HourlyScraper:
                 time.sleep(self.config.delay_between_requests)
 
         except KeyboardInterrupt:
-            print("\n\n⚠️  Scraping interrupted by user")
+            self.log.error("\n\n⚠️  Scraping interrupted by user")
         except Exception as e:
-            print(f"❌ Error during scraping: {str(e)[:200]}")
+            self.log.error(f"❌ Error during scraping: {str(e)[:200]}")
 
         elapsed_time = time.time() - start_time
 
-        # Print final statistics
-        print(f"\n{'=' * 60}")
-        print("📊 SCRAPING COMPLETED")
-        print(f"{'=' * 60}")
-        print(f"✅ Total listings collected: {self.stats.total_listings}")
-        print(f"⏭️  Duplicates skipped: {self.stats.duplicates_skipped}")
-        print(f"📄 Pages processed: {self.stats.pages_processed}")
-        print(f"🌐 Total requests: {self.stats.total_requests}")
-        print(f"❌ Failed requests: {self.stats.failed_requests}")
-        print(f"⏱️  Time elapsed: {elapsed_time:.2f} seconds")
+        # self.log. final statistics
+        self.log.info(f"\n{'=' * 60}")
+        self.log.info("📊 SCRAPING COMPLETED")
+        self.log.info(f"{'=' * 60}")
+        self.log.info(f"✅ Total listings collected: {self.stats.total_listings}")
+        self.log.info(f"⏭️  Duplicates skipped: {self.stats.duplicates_skipped}")
+        self.log.info(f"📄 Pages processed: {self.stats.pages_processed}")
+        self.log.info(f"🌐 Total requests: {self.stats.total_requests}")
+        self.log.info(f"❌ Failed requests: {self.stats.failed_requests}")
+        self.log.info(f"⏱️  Time elapsed: {elapsed_time:.2f} seconds")
         if elapsed_time > 0:
-            print(f"⚡ Average: {self.stats.total_listings / elapsed_time:.2f} listings/sec")
-        print(f"{'=' * 60}")
+            self.log.info(f"⚡ Average: {self.stats.total_listings / elapsed_time:.2f} listings/sec")
+        self.log.info(f"{'=' * 60}")
 
 
 def main():

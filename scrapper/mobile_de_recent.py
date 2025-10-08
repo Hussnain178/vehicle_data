@@ -12,6 +12,7 @@ from utils.key_mapping import convert_vehicle_data
 from utils.filters import *
 from configuration.config import Config
 from database.db import VehicleDatabase
+from logger.logger_setup import LoggerSetup
 
 
 @dataclass
@@ -73,8 +74,9 @@ class MobileDeHourlyScraper:
         """Initialize scraper with configuration"""
         self.config = config or ScraperConfig()
         self.stats = ScraperStats()
+        self.log = LoggerSetup("mobile_de_complete.log").get_logger()
         self.unique_features = mobile_features
-        self.db_obj = VehicleDatabase()
+        self.db_obj = VehicleDatabase(logger=self.log)
 
     def _make_request(self, url: str, use_proxy: bool = True) -> Optional[requests.Response]:
         """Make HTTP request with retry logic and error handling"""
@@ -91,15 +93,18 @@ class MobileDeHourlyScraper:
 
                 if response.status_code == 200 and len(response.text) > self.config.min_response_size:
                     return response
+                elif response.status_code == 410:
+                    self.log.info(f"⚠️  HTTP {response.status_code} Returning because Page is not available!")
+                    return None
                 else:
-                    print(f"⚠️  HTTP {response.status_code} on attempt {attempt + 1}/{self.config.max_retries}")
+                    self.log.info(f"⚠️  HTTP {response.status_code} on attempt {attempt + 1}/{self.config.max_retries}")
 
             except requests.exceptions.Timeout:
-                print(f"⏱️  Timeout on attempt {attempt + 1}/{self.config.max_retries}")
+                self.log.info(f"⏱️  Timeout on attempt {attempt + 1}/{self.config.max_retries}")
             except requests.exceptions.ConnectionError:
-                print(f"🔌 Connection error on attempt {attempt + 1}/{self.config.max_retries}")
+                self.log.info(f"🔌 Connection error on attempt {attempt + 1}/{self.config.max_retries}")
             except Exception as e:
-                print(f"❌ Error on attempt {attempt + 1}/{self.config.max_retries}: {str(e)[:100]}")
+                self.log.info(f"❌ Error on attempt {attempt + 1}/{self.config.max_retries}: {str(e)[:100]}")
 
             if attempt < self.config.max_retries - 1:
                 time.sleep(2 ** attempt)  # Exponential backoff
@@ -139,14 +144,14 @@ class MobileDeHourlyScraper:
                         data = json.loads(json_str)
                         return data
                     except json.JSONDecodeError as e:
-                        print(f"❌ JSON decode error: {str(e)[:100]}")
+                        self.log.info(f"❌ JSON decode error: {str(e)[:100]}")
                         return None
 
-            print("⚠️  No __INITIAL_STATE__ found in HTML")
+            self.log.info("⚠️  No __INITIAL_STATE__ found in HTML")
             return None
 
         except Exception as e:
-            print(f"❌ Error extracting JSON: {str(e)[:100]}")
+            self.log.info(f"❌ Error extracting JSON: {str(e)[:100]}")
             return None
 
     def get_search_response(self, url: str, params: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -199,7 +204,7 @@ class MobileDeHourlyScraper:
 
         # Check for duplicate
         if self.db_obj.check_id_exists(listing_id, 'mobile'):
-            print(f"⏭️  Skipping duplicate ID: {listing_id}")
+            self.log.info(f"⏭️  Skipping duplicate ID: {listing_id}")
             self.stats.duplicates_skipped += 1
             return None
 
@@ -207,7 +212,7 @@ class MobileDeHourlyScraper:
             product_response = self.get_detail_response(basic_data['url'])
 
             if not product_response:
-                print(f"⚠️  Failed to get details for: {basic_data['url']}")
+                self.log.info(f"⚠️  Failed to get details for: {basic_data['url']}")
                 return basic_data
 
             # Navigate to ad data
@@ -219,7 +224,7 @@ class MobileDeHourlyScraper:
                        .get('ad', {}))
 
             if not ad_data:
-                print(f"⚠️  No ad data found for ID: {basic_data['id']}")
+                self.log.info(f"⚠️  No ad data found for ID: {basic_data['id']}")
                 return basic_data
 
             basic_data['vehicle_make'] = ad_data.get('make', None)
@@ -269,16 +274,15 @@ class MobileDeHourlyScraper:
                     if new_key:
                         basic_data[new_key] = value
 
-            print(f"✅ Parsed: {basic_data.get('title', 'Unknown')[:50]} - €{basic_data.get('price', 'N/A')}")
+            self.log.info(f"✅ Parsed: {basic_data.get('title', 'Unknown')[:50]} - €{basic_data.get('price', 'N/A')}")
             return basic_data
 
         except Exception as e:
-            print(f"❌ Error parsing details for {basic_data.get('url', 'Unknown')}: {str(e)[:100]}")
+            self.log.info(f"❌ Error parsing details for {basic_data.get('url', 'Unknown')}: {str(e)[:100]}")
             return basic_data
 
     def process_listings(self, listings: List[Dict[str, Any]]):
         """Process multiple listings using thread pool"""
-        parsed_listings = []
         lock = threading.Lock()
 
         def process_single(listing):
@@ -299,9 +303,8 @@ class MobileDeHourlyScraper:
                         self.stats.total_listings += 1
                         self.stats.list_process_per_page += 1
 
-
             except Exception as e:
-                print(f"❌ Error processing listing: {e}")
+                self.log.info(f"❌ Error processing listing: {e}")
 
         with ThreadPoolExecutor(max_workers=self.config.max_workers) as executor:
             futures = [executor.submit(process_single, listing) for listing in listings]
@@ -309,24 +312,22 @@ class MobileDeHourlyScraper:
             for future in as_completed(futures):
                 future.result()
 
-
-
     def run(self):
         """Main execution method - fetch latest listings sorted by date"""
-        print("🚀 Starting Mobile.de hourly scraping...")
-        print(f"⚙️  Config: Max {self.config.max_pages} pages, sorted by date")
+        self.log.info("🚀 Starting Mobile.de hourly scraping...")
+        self.log.info(f"⚙️  Config: Max {self.config.max_pages} pages, sorted by date")
 
         start_time = time.time()
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f"🕐 Run timestamp: {timestamp}")
+        self.log.info(f"🕐 Run timestamp: {timestamp}")
 
         url = "https://suchen.mobile.de/fahrzeuge/search.html"
         page_number = 1
 
         try:
             while page_number < self.config.max_pages:
-                print(f"\n{'=' * 60}")
-                print(f"📖 Processing page {page_number}")
+                self.log.info(f"\n{'=' * 60}")
+                self.log.info(f"📖 Processing page {page_number}")
 
                 # Build search parameters
                 params = {
@@ -343,7 +344,7 @@ class MobileDeHourlyScraper:
                 response = self.get_search_response(url, params)
 
                 if not response or 'search' not in response:
-                    print(f"❌ Failed to get response for page {page_number}")
+                    self.log.info(f"❌ Failed to get response for page {page_number}")
                     break
 
                 # Get search results
@@ -352,24 +353,25 @@ class MobileDeHourlyScraper:
                 num_pages = search_results.get('numPages', 0)
 
                 if page_number == 1:
-                    print(f"📈 Total results available: {num_results}")
-                    print(f"📄 Total pages available: {num_pages}")
+                    self.log.info(f"📈 Total results available: {num_results}")
+                    self.log.info(f"📄 Total pages available: {num_pages}")
 
                 # Extract listings
                 listings = search_results.get('items', [])
 
                 if not listings:
-                    print("⚠️  No listings found on this page")
+                    self.log.info("⚠️  No listings found on this page")
                     break
 
-                print(f"🔄 Processing {len(listings)} listings from this page")
+                self.log.info(f"🔄 Processing {len(listings)} listings from this page")
 
                 # Process listings
                 self.process_listings(listings)
 
                 self.stats.pages_processed += 1
 
-                print(f"✅ Parsed {self.stats.list_process_per_page} listings (Total: {self.stats.total_listings}")
+                self.log.info(
+                    f"✅ Parsed {self.stats.list_process_per_page} listings (Total: {self.stats.total_listings}")
                 if self.stats.list_process_per_page == 0:
                     self.stats.consective_no_data_page_count += 1
                 else:
@@ -377,11 +379,11 @@ class MobileDeHourlyScraper:
                     self.stats.consective_no_data_page_count = 0
 
                 if self.stats.consective_no_data_page_count == 3:
-                    print(f"📄 Three pages have no New data Stopping script!")
+                    self.log.info(f"📄 Three pages have no New data Stopping script!")
                     break
 
                 if page_number >= num_pages:
-                    print(f"📄 Reached last page ({num_pages})")
+                    self.log.info(f"📄 Reached last page ({num_pages})")
                     break
                 page_number += 1
 
@@ -389,25 +391,25 @@ class MobileDeHourlyScraper:
                 time.sleep(self.config.delay_between_requests)
 
         except KeyboardInterrupt:
-            print("\n\n⚠️  Scraping interrupted by user")
+            self.log.info("\n\n⚠️  Scraping interrupted by user")
         except Exception as e:
-            print(f"❌ Error during scraping: {str(e)[:200]}")
+            self.log.info(f"❌ Error during scraping: {str(e)[:200]}")
 
         elapsed_time = time.time() - start_time
 
-        # Print final statistics
-        print(f"\n{'=' * 60}")
-        print("📊 SCRAPING COMPLETED")
-        print(f"{'=' * 60}")
-        print(f"✅ Total listings collected: {self.stats.total_listings}")
-        print(f"⏭️  Duplicates skipped: {self.stats.duplicates_skipped}")
-        print(f"📄 Pages processed: {self.stats.pages_processed}")
-        print(f"🌐 Total requests: {self.stats.total_requests}")
-        print(f"❌ Failed requests: {self.stats.failed_requests}")
-        print(f"⏱️  Time elapsed: {elapsed_time:.2f} seconds")
+        # self.log.info final statistics
+        self.log.info(f"\n{'=' * 60}")
+        self.log.info("📊 SCRAPING COMPLETED")
+        self.log.info(f"{'=' * 60}")
+        self.log.info(f"✅ Total listings collected: {self.stats.total_listings}")
+        self.log.info(f"⏭️  Duplicates skipped: {self.stats.duplicates_skipped}")
+        self.log.info(f"📄 Pages processed: {self.stats.pages_processed}")
+        self.log.info(f"🌐 Total requests: {self.stats.total_requests}")
+        self.log.info(f"❌ Failed requests: {self.stats.failed_requests}")
+        self.log.info(f"⏱️  Time elapsed: {elapsed_time:.2f} seconds")
         if elapsed_time > 0:
-            print(f"⚡ Average: {self.stats.total_listings / elapsed_time:.2f} listings/sec")
-        print(f"{'=' * 60}")
+            self.log.info(f"⚡ Average: {self.stats.total_listings / elapsed_time:.2f} listings/sec")
+        self.log.info(f"{'=' * 60}")
 
 
 def main():

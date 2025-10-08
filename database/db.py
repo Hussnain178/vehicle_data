@@ -97,7 +97,7 @@ class VehicleDatabase:
                     'right_hand_drive', 'taxi', 'disabled_accessible', 'smoker_package', 'leather_interior',
                     'paddle_shifters']
 
-    def __init__(self, schema_name: str = "vehicle_marketplace", table_name: str = "vehicle_data"):
+    def __init__(self, logger,  schema_name: str = "vehicle_marketplace", table_name: str = "vehicle_data"):
         """
         Initialize database connection with thread-safe connection pooling.
 
@@ -105,10 +105,11 @@ class VehicleDatabase:
             schema_name: Name of the schema (default: vehicle_marketplace)
             table_name: Name of the table (default: vehicle_data)
         """
+        self.log = logger
         self.schema_name = schema_name
         self.table_name = table_name
 
-        print(f"Initializing VehicleDatabase for schema: {schema_name}, table: {table_name}")
+        self.log.info(f"Initializing VehicleDatabase for schema: {schema_name}, table: {table_name}")
 
         # Get or create connection pool for this database
         pool_key = f"{self.host}:{self.port}:{self.database_name}"
@@ -116,7 +117,7 @@ class VehicleDatabase:
         with self._lock:
             if pool_key not in self._connection_pools:
                 try:
-                    print(f"Creating new connection pool for {pool_key}")
+                    self.log.info(f"Creating new connection pool for {pool_key}")
                     self._connection_pools[pool_key] = pool.ThreadedConnectionPool(
                         minconn=1,
                         maxconn=20,
@@ -126,9 +127,9 @@ class VehicleDatabase:
                         host=self.host,
                         port=self.port
                     )
-                    print("Connection pool created successfully")
+                    self.log.info("Connection pool created successfully")
                 except Exception as e:
-                    print(f"ERROR: Failed to create connection pool: {e}")
+                    self.log.error(f"ERROR: Failed to create connection pool: {e}")
                     raise
 
         self.connection_pool = self._connection_pools[pool_key]
@@ -142,7 +143,7 @@ class VehicleDatabase:
             conn = self.connection_pool.getconn()
             return conn
         except Exception as e:
-            print(f"ERROR: Failed to get connection from pool: {e}")
+            self.log.error(f"ERROR: Failed to get connection from pool: {e}")
             raise
 
     def _put_connection(self, conn):
@@ -150,7 +151,7 @@ class VehicleDatabase:
         try:
             self.connection_pool.putconn(conn)
         except Exception as e:
-            print(f"ERROR: Failed to return connection to pool: {e}")
+            self.log.error(f"ERROR: Failed to return connection to pool: {e}")
 
     def _initialize_database(self):
         """Initialize database, schema, and table if they don't exist."""
@@ -158,9 +159,9 @@ class VehicleDatabase:
             self.check_schema_exist()
             self.create_table_if_not_exists()
             self.create_indexes()
-            print("Database initialization completed successfully")
+            self.log.info("Database initialization completed successfully")
         except Exception as e:
-            print(f"ERROR: Database initialization failed: {e}")
+            self.log.error(f"ERROR: Database initialization failed: {e}")
             raise
 
     def check_schema_exist(self):
@@ -178,15 +179,15 @@ class VehicleDatabase:
             )
 
             if cursor.fetchone() is None:
-                print(f"Schema '{self.schema_name}' does not exist. Creating...")
+                self.log.info(f"Schema '{self.schema_name}' does not exist. Creating...")
                 cursor.execute(sql.SQL("CREATE SCHEMA {}").format(sql.Identifier(self.schema_name)))
                 conn.commit()
-                print(f"Schema '{self.schema_name}' created successfully")
+                self.log.info(f"Schema '{self.schema_name}' created successfully")
             else:
-                print(f"Schema '{self.schema_name}' already exists")
+                self.log.info(f"Schema '{self.schema_name}' already exists")
 
         except Exception as e:
-            print(f"ERROR: Failed to check/create schema: {e}")
+            self.log.error(f"ERROR: Failed to check/create schema: {e}")
             if conn:
                 conn.rollback()
             raise
@@ -236,10 +237,10 @@ class VehicleDatabase:
 
             cursor.execute(create_table_query)
             conn.commit()
-            print(f"Table '{self.schema_name}.{self.table_name}' checked/created successfully")
+            self.log.info(f"Table '{self.schema_name}.{self.table_name}' checked/created successfully")
 
         except Exception as e:
-            print(f"ERROR: Failed to create table: {e}")
+            self.log.error(f"ERROR: Failed to create table: {e}")
             if conn:
                 conn.rollback()
             raise
@@ -293,10 +294,10 @@ class VehicleDatabase:
                 cursor.execute(query)
 
             conn.commit()
-            print("✅ Indexes created successfully")
+            self.log.info("✅ Indexes created successfully")
 
         except Exception as e:
-            print(f"ERROR: Failed to create indexes: {e}")
+            self.log.error(f"ERROR: Failed to create indexes: {e}")
             if conn:
                 conn.rollback()
             raise
@@ -349,7 +350,7 @@ class VehicleDatabase:
             return exists
 
         except Exception as e:
-            print(f"ERROR: Failed to check if ID exists: {e}")
+            self.log.info(f"ERROR: Failed to check if ID exists: {e}")
             raise
         finally:
             if cursor:
@@ -373,11 +374,11 @@ class VehicleDatabase:
         try:
             # Validate required fields
             if 'vehicle_id' not in data or 'data_source' not in data:
-                print("ERROR: 'vehicle_id' and 'data_source' are required fields")
+                self.log.info("ERROR: 'vehicle_id' and 'data_source' are required fields")
                 return False
 
             if not data['vehicle_id'] or not data['data_source']:
-                print("ERROR: 'vehicle_id' and 'data_source' cannot be empty")
+                self.log.info("ERROR: 'vehicle_id' and 'data_source' cannot be empty")
                 return False
 
             # Generate unique_id
@@ -385,7 +386,7 @@ class VehicleDatabase:
 
             # Check if already exists
             # if self.check_id_exists(data['vehicle_id'], data['data_source']):
-            #     print(f"SKIP: Vehicle with ID '{unique_id}' already exists")
+            #     self.log.(f"SKIP: Vehicle with ID '{unique_id}' already exists")
             #     return False
 
             conn = self._get_connection()
@@ -416,16 +417,16 @@ class VehicleDatabase:
             cursor.execute(query, values)
             conn.commit()
 
-            print(f"SUCCESS: Vehicle '{unique_id}' inserted successfully")
+            self.log.info(f"SUCCESS: Vehicle '{unique_id}' inserted successfully")
             return True
 
         except psycopg2.IntegrityError as e:
-            print(f"ERROR: Integrity error during insertion: {e}")
+            self.log.error(f"ERROR: Integrity error during insertion: {e}")
             if conn:
                 conn.rollback()
             return False
         except Exception as e:
-            print(f"ERROR: Failed to insert vehicle: {e}")
+            self.log.error(f"ERROR: Failed to insert vehicle: {e}")
             if conn:
                 conn.rollback()
             return False
@@ -440,9 +441,9 @@ class VehicleDatabase:
         try:
             if hasattr(self, 'connection_pool') and self.connection_pool:
                 self.connection_pool.closeall()
-                print("All database connections closed")
+                self.log.info("All database connections closed")
         except Exception as e:
-            print(f"ERROR: Failed to close connections: {e}")
+            self.log.error(f"ERROR: Failed to close connections: {e}")
 
 
 def ensure_database_exists(dbname=Config.DATABASE_NAME, user=Config.DATABASE_USER, password=Config.DATABASE_PASSWORD,
@@ -457,7 +458,7 @@ def ensure_database_exists(dbname=Config.DATABASE_NAME, user=Config.DATABASE_USE
 
     if not exists:
         cur.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(dbname)))
-        print(f"✅ Database '{dbname}' created successfully!")
+        # self.log.(f"✅ Database '{dbname}' created successfully!")
 
     cur.close()
     conn.close()

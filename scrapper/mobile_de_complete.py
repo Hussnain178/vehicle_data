@@ -11,6 +11,7 @@ from utils.key_mapping import convert_vehicle_data
 from utils.filters import *
 from configuration.config import Config
 from database.db import VehicleDatabase
+from logger.logger_setup import LoggerSetup
 
 
 @dataclass
@@ -74,9 +75,10 @@ class MobileDeScraper:
         """Initialize scraper with configuration"""
         self.config = config or ScraperConfig()
         self.stats = ScraperStats()
+        self.log = LoggerSetup("mobile_de_complete.log").get_logger()
         self.unique_features = mobile_features
         self.mobile_car_filters = mobile_car_filters
-        self.db_obj = VehicleDatabase()
+        self.db_obj = VehicleDatabase(logger=self.log)
 
     def _make_request(self, url: str, use_proxy: bool = True) -> Optional[requests.Response]:
         """Make HTTP request with retry logic and error handling"""
@@ -95,15 +97,18 @@ class MobileDeScraper:
 
                 if response.status_code == 200 and len(response.text) > self.config.min_response_size:
                     return response
+                elif response.status_code == 410:
+                    self.log.info(f"⚠️  HTTP {response.status_code} Returning because Page is not available!")
+                    return None
                 else:
-                    print(f"⚠️  HTTP {response.status_code} on attempt {attempt + 1}/{self.config.max_retries}")
+                    self.log.info(f"⚠️  HTTP {response.status_code} on attempt {attempt + 1}/{self.config.max_retries}")
 
             except requests.exceptions.Timeout:
-                print(f"⏱️  Timeout on attempt {attempt + 1}/{self.config.max_retries}")
+                self.log.error(f"⏱️  Timeout on attempt {attempt + 1}/{self.config.max_retries}")
             except requests.exceptions.ConnectionError:
-                print(f"🔌 Connection error on attempt {attempt + 1}/{self.config.max_retries}")
+                self.log.error(f"🔌 Connection error on attempt {attempt + 1}/{self.config.max_retries}")
             except Exception as e:
-                print(f"❌ Error on attempt {attempt + 1}/{self.config.max_retries}: {str(e)[:100]}")
+                self.log.error(f"❌ Error on attempt {attempt + 1}/{self.config.max_retries}: {str(e)[:100]}")
 
             if attempt < self.config.max_retries - 1:
                 time.sleep(2 ** attempt)  # Exponential backoff
@@ -143,14 +148,14 @@ class MobileDeScraper:
                         data = json.loads(json_str)
                         return data
                     except json.JSONDecodeError as e:
-                        print(f"❌ JSON decode error: {str(e)[:100]}")
+                        self.log.error(f"❌ JSON decode error: {str(e)[:100]}")
                         return None
 
-            print("⚠️  No __INITIAL_STATE__ found in HTML")
+            self.log.info("⚠️  No __INITIAL_STATE__ found in HTML")
             return None
 
         except Exception as e:
-            print(f"❌ Error extracting JSON: {str(e)[:100]}")
+            self.log.error(f"❌ Error extracting JSON: {str(e)[:100]}")
             return None
 
     def get_search_response(self, url: str, params: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -184,7 +189,7 @@ class MobileDeScraper:
         range_size = end - start
 
         if range_size <= 1:
-            print(f"⚠️  Cannot split range further: ({start}, {end})")
+            self.log.info(f"⚠️  Cannot split range further: ({start}, {end})")
             return [price_range]
 
         # Calculate chunks with 20% buffer
@@ -197,7 +202,7 @@ class MobileDeScraper:
             if i < chunk_end:
                 new_ranges.append((i, chunk_end))
 
-        print(f"📊 Split range ({start}, {end}) with {num_results} results into {len(new_ranges)} chunks")
+        self.log.info(f"📊 Split range ({start}, {end}) with {num_results} results into {len(new_ranges)} chunks")
         return new_ranges
 
     def parse_basic_listing(self, listing: Dict[str, Any]) -> Dict[str, Any]:
@@ -233,7 +238,7 @@ class MobileDeScraper:
 
         # Check for duplicate
         if self.db_obj.check_id_exists(listing_id, 'mobile'):
-            print(f"⏭️  Skipping duplicate ID: {listing_id}")
+            self.log.info(f"⏭️  Skipping duplicate ID: {listing_id}")
             self.stats.duplicates_skipped += 1
             return None
 
@@ -241,7 +246,7 @@ class MobileDeScraper:
             product_response = self.get_detail_response(basic_data['url'])
 
             if not product_response:
-                print(f"⚠️  Failed to get details for: {basic_data['url']}")
+                self.log.info(f"⚠️  Failed to get details for: {basic_data['url']}")
                 return basic_data
 
             # Navigate to ad data
@@ -253,7 +258,7 @@ class MobileDeScraper:
                        .get('ad', {}))
 
             if not ad_data:
-                print(f"⚠️  No ad data found for ID: {basic_data['id']}")
+                self.log.info(f"⚠️  No ad data found for ID: {basic_data['id']}")
                 return basic_data
             basic_data['vehicle_make'] = ad_data.get('make', None)
             basic_data['vehicle_model'] = ad_data.get('model', None)
@@ -302,11 +307,11 @@ class MobileDeScraper:
                         basic_data[new_key] = value
 
 
-            print(f"✅ Parsed: {basic_data.get('title', 'Unknown')[:50]} - €{basic_data.get('price', 'N/A')}")
+            self.log.info(f"✅ Parsed: {basic_data.get('title', 'Unknown')[:50]} - €{basic_data.get('price', 'N/A')}")
             return basic_data
 
         except Exception as e:
-            print(f"❌ Error parsing details for {basic_data.get('url', 'Unknown')}: {str(e)[:100]}")
+            self.log.error(f"❌ Error parsing details for {basic_data.get('url', 'Unknown')}: {str(e)[:100]}")
             return basic_data
 
     def process_listings(self, listings: List[Dict[str, Any]]):
@@ -332,7 +337,7 @@ class MobileDeScraper:
                         self.stats.list_process_per_page += 1
 
             except Exception as e:
-                print(f"❌ Error processing listing: {e}")
+                self.log.error(f"❌ Error processing listing: {e}")
 
         # 🔹 Use ThreadPoolExecutor with max 5 workers
         with ThreadPoolExecutor(max_workers=5) as executor:
@@ -345,8 +350,8 @@ class MobileDeScraper:
 
     def process_price_range(self, price_range: Tuple[int, int], extra_params: Optional[Dict[str, Any]] = None) -> None:
         """Process a single price range with dynamic chunking"""
-        print(f"\n{'=' * 60}")
-        print(f"💰 Processing price range: €{price_range[0]} - €{price_range[1]}")
+        self.log.info(f"\n{'=' * 60}")
+        self.log.info(f"💰 Processing price range: €{price_range[0]} - €{price_range[1]}")
 
         # Build search parameters
         params = {
@@ -370,34 +375,34 @@ class MobileDeScraper:
         response = self.get_search_response(url, params)
 
         if not response or 'search' not in response:
-            print(f"❌ Failed to get response for range {price_range}")
+            self.log.info(f"❌ Failed to get response for range {price_range}")
             return
 
         # Get search results metadata
         search_results = response.get('search', {}).get('srp', {}).get('data', {}).get('searchResults', {})
         num_results = search_results.get('numResultsTotal', 0)
 
-        print(f"📈 Found {num_results} results")
+        self.log.info(f"📈 Found {num_results} results")
 
         if num_results == 0:
-            print("⏭️  No results, skipping range")
+            self.log.info("⏭️  No results, skipping range")
             return
 
         # Handle range splitting if needed
         if num_results > self.config.max_results_per_range and not extra_params:
             if price_range[1] - price_range[0] == 1:
-                print(f"🔄 Single price point with {num_results} results, trying sorting variations")
+                self.log.info(f"🔄 Single price point with {num_results} results, trying sorting variations")
                 # for sort_params in [{'sb': 'doc', 'od': 'up'}, {'sb': 'doc', 'od': 'down'}]:
                 # for sort_params in [{'sb': 'doc', 'od': 'up'}, {'sb': 'doc', 'od': 'down'}]:
                 for filter in self.mobile_car_filters:
                     key = list(filter.keys())[0]
                     value = list(filter.values())[0]
                     sort_params = {"ms": value}
-                    print(f"Fetching info of car {key} with range {price_range}")
+                    self.log.info(f"Fetching info of car {key} with range {price_range}")
                     self.process_price_range(price_range, sort_params)
                 return
 
-            print(f"⚠️  Too many results ({num_results}), splitting range...")
+            self.log.info(f"⚠️  Too many results ({num_results}), splitting range...")
             sub_ranges = self.split_range_dynamically(price_range, num_results)
 
             for sub_range in sub_ranges:
@@ -406,10 +411,10 @@ class MobileDeScraper:
 
         # Process all pages
         num_pages = search_results.get('numPages', 1)
-        print(f"📄 Processing {num_pages} page(s)")
+        self.log.info(f"📄 Processing {num_pages} page(s)")
 
         for page in range(1, num_pages + 1):
-            print(f"  📖 Page {page}/{num_pages}")
+            self.log.info(f"  📖 Page {page}/{num_pages}")
 
             if page == 1:
                 current_response = response
@@ -418,7 +423,7 @@ class MobileDeScraper:
                 current_response = self.get_search_response(url, params)
 
             if not current_response or 'search' not in current_response:
-                print(f"  ⚠️  Failed to get page {page}")
+                self.log.info(f"  ⚠️  Failed to get page {page}")
                 continue
 
             # Extract listings
@@ -431,50 +436,50 @@ class MobileDeScraper:
             self.process_listings(listings)
 
             self.stats.pages_processed += 1
-            print(f"  ✅ Parsed {self.stats.list_process_per_page} listings (Total: {self.stats.total_listings})")
+            self.log.info(f"  ✅ Parsed {self.stats.list_process_per_page} listings (Total: {self.stats.total_listings})")
             self.stats.list_process_per_page = 0
         self.stats.ranges_processed += 1
 
     def run(self):
         """Main execution method"""
-        print("🚀 Starting Mobile.de scraping...")
-        print(f"⚙️  Config: €{self.config.price_start}-€{self.config.price_end}, "
+        self.log.info("🚀 Starting Mobile.de scraping...")
+        self.log.info(f"⚙️  Config: €{self.config.price_start}-€{self.config.price_end}, "
               f"chunk size: €{self.config.initial_chunk_size}")
 
         start_time = time.time()
         price_ranges = self.generate_price_ranges()
 
-        print(f"📊 Generated {len(price_ranges)} initial price ranges")
+        self.log.info(f"📊 Generated {len(price_ranges)} initial price ranges")
 
         for i, price_range in enumerate(price_ranges, 1):
             try:
-                print(f"\n{'#' * 60}")
-                print(f"Range {i}/{len(price_ranges)}")
+                self.log.info(f"\n{'#' * 60}")
+                self.log.info(f"Range {i}/{len(price_ranges)}")
                 self.process_price_range(price_range)
 
             except KeyboardInterrupt:
-                print("\n\n⚠️  Scraping interrupted by user")
+                self.log.error("\n\n⚠️  Scraping interrupted by user")
                 break
             except Exception as e:
-                print(f"❌ Error processing range {price_range}: {str(e)[:200]}")
+                self.log.error(f"❌ Error processing range {price_range}: {str(e)[:200]}")
                 continue
 
         elapsed_time = time.time() - start_time
 
-        # Print final statistics
-        print(f"\n{'=' * 60}")
-        print("📊 SCRAPING COMPLETED")
-        print(f"{'=' * 60}")
-        print(f"✅ Total listings collected: {self.stats.total_listings}")
-        print(f"⏭️  Duplicates skipped: {self.stats.duplicates_skipped}")
-        print(f"📄 Pages processed: {self.stats.pages_processed}")
-        print(f"📦 Ranges processed: {self.stats.ranges_processed}")
-        print(f"🌐 Total requests: {self.stats.total_requests}")
-        print(f"❌ Failed requests: {self.stats.failed_requests}")
-        print(f"⏱️  Time elapsed: {elapsed_time:.2f} seconds")
+        # self.log. final statistics
+        self.log.info(f"\n{'=' * 60}")
+        self.log.info("📊 SCRAPING COMPLETED")
+        self.log.info(f"{'=' * 60}")
+        self.log.info(f"✅ Total listings collected: {self.stats.total_listings}")
+        self.log.info(f"⏭️  Duplicates skipped: {self.stats.duplicates_skipped}")
+        self.log.info(f"📄 Pages processed: {self.stats.pages_processed}")
+        self.log.info(f"📦 Ranges processed: {self.stats.ranges_processed}")
+        self.log.info(f"🌐 Total requests: {self.stats.total_requests}")
+        self.log.info(f"❌ Failed requests: {self.stats.failed_requests}")
+        self.log.info(f"⏱️  Time elapsed: {elapsed_time:.2f} seconds")
         if elapsed_time > 0:
-            print(f"⚡ Average: {self.stats.total_listings / elapsed_time:.2f} listings/sec")
-        print(f"{'=' * 60}")
+            self.log.info(f"⚡ Average: {self.stats.total_listings / elapsed_time:.2f} listings/sec")
+        self.log.info(f"{'=' * 60}")
 
 
 def main():
