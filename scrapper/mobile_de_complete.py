@@ -6,6 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 from dataclasses import dataclass
 import threading
+from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from utils.key_mapping import convert_vehicle_data
 from utils.filters import *
@@ -238,6 +239,7 @@ class MobileDeScraper:
 
         # Check for duplicate
         if self.db_obj.check_id_exists(listing_id, 'mobile'):
+            self.db_obj.touch_updated_at(listing_id, 'mobile')
             self.log.info(f"⏭️  Skipping duplicate ID: {listing_id}")
             self.stats.duplicates_skipped += 1
             return None
@@ -445,7 +447,7 @@ class MobileDeScraper:
         self.log.info("🚀 Starting Mobile.de scraping...")
         self.log.info(f"⚙️  Config: €{self.config.price_start}-€{self.config.price_end}, "
               f"chunk size: €{self.config.initial_chunk_size}")
-
+        start_date = datetime.now().strftime("%d-%m-%Y")
         start_time = time.time()
         price_ranges = self.generate_price_ranges()
 
@@ -465,7 +467,7 @@ class MobileDeScraper:
                 continue
 
         elapsed_time = time.time() - start_time
-
+        self.db_obj.mark_unavailable_before(start_date, 'mobile')
         # self.log. final statistics
         self.log.info(f"\n{'=' * 60}")
         self.log.info("📊 SCRAPING COMPLETED")
