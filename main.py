@@ -5,7 +5,7 @@ import sys
 if __name__ == '__main__':
     arguments = sys.argv[1:]
     ensure_database_exists()
-    # arguments = ['mobile']
+    # arguments = ['mobile_recent']
     if arguments[0] == 'autoscout24_complete':
         autoscout24_complete.main()
     elif arguments[0] == 'mobile_complete':

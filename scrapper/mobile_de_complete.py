@@ -80,6 +80,7 @@ class MobileDeScraper:
         self.unique_features = mobile_features
         self.mobile_car_filters = mobile_car_filters
         self.db_obj = VehicleDatabase(logger=self.log)
+        self.thread_limit = Config.MOBILE_THREAD_COUNT
 
     def _make_request(self, url: str, use_proxy: bool = True) -> Optional[requests.Response]:
         """Make HTTP request with retry logic and error handling"""
@@ -342,7 +343,7 @@ class MobileDeScraper:
                 self.log.error(f"❌ Error processing listing: {e}")
 
         # 🔹 Use ThreadPoolExecutor with max 5 workers
-        with ThreadPoolExecutor(max_workers=5) as executor:
+        with ThreadPoolExecutor(max_workers=self.thread_limit) as executor:
             # Submit all tasks and collect futures
             futures = [executor.submit(process_single, listing) for listing in listings]
 

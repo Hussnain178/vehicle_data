@@ -11,6 +11,8 @@ from datetime import datetime
 from proxies.webshare import WEBSHARE
 from database.db import VehicleDatabase
 from logger.logger_setup import LoggerSetup
+from configuration.config import Config
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 @dataclass
@@ -48,6 +50,7 @@ class AutoScout24Scraper:
         self.unique_features = autoscout24_features
         self.autoscout24_car_filters = autoscout24_car_filters
         self.db_obj = VehicleDatabase(logger=self.log)
+        self.thread_limit = Config.AUTOSCOUT_THREAD_COUNT
 
     def _make_request(self, url: str, params: Optional[Dict[str, Any]] = None,
                       is_pagination: bool = False) -> Optional[requests.Response]:
@@ -87,7 +90,8 @@ class AutoScout24Scraper:
                 if response.status_code == 200:
                     return response
                 else:
-                    self.log.warning(f"⚠️  HTTP {response.status_code} on attempt {attempt + 1}/{self.config.max_retries}")
+                    self.log.warning(
+                        f"⚠️  HTTP {response.status_code} on attempt {attempt + 1}/{self.config.max_retries}")
 
             except requests.exceptions.Timeout:
                 self.log.error(f"⏱️  Timeout on attempt {attempt + 1}/{self.config.max_retries}")
@@ -341,46 +345,59 @@ class AutoScout24Scraper:
             self.log.error(f"❌ Error parsing details for {basic_data.get('url', 'Unknown')}: {str(e)[:100]}")
             return basic_data
 
-
     def process_listings(self, listings: List[Dict[str, Any]]):
         """Process multiple listings concurrently (max 20 threads)"""
-        threads = []
-        lock = threading.Lock()  # for thread-safe updates
-        def process_single(listing):
-            try:
-                basic_data = self.parse_listing(listing)
-                if not basic_data:
-                    return
+        # threads = []
+        try:
+            lock = threading.Lock()  # for thread-safe updates
 
-                detailed_data = self.parse_detail_listing(basic_data)
-                if not detailed_data:
-                    return
+            def process_single(listing):
+                try:
+                    basic_data = self.parse_listing(listing)
+                    if not basic_data:
+                        return
 
-                # build title
-                detailed_data[
-                    'title'] = f"{detailed_data.get('vehicle_make', '')} {detailed_data.get('vehicle_model', '')} {detailed_data.get('vehicle_modelVersionInput', '')}".strip()
+                    detailed_data = self.parse_detail_listing(basic_data)
+                    if not detailed_data:
+                        return
 
-                final_data = convert_vehicle_data(detailed_data, 'autoscout24')
+                    # build title
+                    detailed_data[
+                        'title'] = f"{detailed_data.get('vehicle_make', '')} {detailed_data.get('vehicle_model', '')} {detailed_data.get('vehicle_modelVersionInput', '')}".strip()
 
-                # thread-safe append and counter increment
-                with lock:
-                    self.db_obj.insert_vehicle(final_data)
-                    self.stats.total_listings += 1
-                    self.stats.list_process_per_page += 1
+                    final_data = convert_vehicle_data(detailed_data, 'autoscout24')
+
+                    # thread-safe append and counter increment
+                    with lock:
+                        self.db_obj.insert_vehicle(final_data)
+                        self.stats.total_listings += 1
+                        self.stats.list_process_per_page += 1
 
 
-            except Exception as e:
-                self.log.error(f"❌ Error processing listing: {e}")
+                except Exception as e:
+                    self.log.error(f"❌ Error processing listing: {e}")
 
+            with ThreadPoolExecutor(max_workers=self.thread_limit) as executor:
+                # Submit all tasks and collect futures
+                futures = [executor.submit(process_single, listing) for listing in listings]
+
+                # Collect results as they complete
+                for future in as_completed(futures):
+                    future.result()
+        except Exception as e:
+            self.log.error(e)
         # 🔹 Create and start threads
-        for listing in listings:
-            t = threading.Thread(target=process_single, args=(listing,))
-            t.start()
-            threads.append(t)
-
-        # 🔹 Wait for all threads to complete
-        for t in threads:
-            t.join()
+        # for listing in listings:
+        #     t = threading.Thread(target=process_single, args=(listing,))
+        #     t.start()
+        #     threads.append(t)
+        #     if len(threads) == self.thread_limit:
+        #         for t in threads:
+        #             t.join()
+        #         threads = []
+        # # 🔹 Wait for all threads to complete
+        # for t in threads:
+        #     t.join()
 
     def process_price_range(self, price_range: Tuple[int, int],
                             extra_params: Optional[Dict[str, Any]] = None) -> None:
@@ -465,7 +482,8 @@ class AutoScout24Scraper:
             listings = current_response['pageProps'].get('listings', [])
             self.process_listings(listings)
             self.stats.pages_processed += 1
-            self.log.info(f"  ✅ Parsed {self.stats.list_process_per_page} listings (Total: {self.stats.total_listings})")
+            self.log.info(
+                f"  ✅ Parsed {self.stats.list_process_per_page} listings (Total: {self.stats.total_listings})")
             self.stats.list_process_per_page = 0
 
         self.stats.ranges_processed += 1
@@ -474,7 +492,7 @@ class AutoScout24Scraper:
         """Main execution method"""
         self.log.info("🚀 Starting AutoScout24 scraping...")
         self.log.info(f"⚙️  Config: €{self.config.price_start}-€{self.config.price_end}, "
-              f"chunk size: €{self.config.initial_chunk_size}")
+                      f"chunk size: €{self.config.initial_chunk_size}")
         start_date = datetime.now().strftime("%d-%m-%Y")
         start_time = time.time()
         price_ranges = self.generate_price_ranges()
@@ -527,4 +545,3 @@ def main():
     # Initialize and run scraper
     scraper = AutoScout24Scraper(config)
     scraper.run()
-

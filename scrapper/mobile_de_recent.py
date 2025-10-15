@@ -23,7 +23,6 @@ class ScraperConfig:
     max_retries: int = 5
     delay_between_requests: float = .1
     min_response_size: int = 6000
-    max_workers: int = 5
 
 
 @dataclass
@@ -77,7 +76,7 @@ class MobileDeHourlyScraper:
         self.log = LoggerSetup("mobile_de_complete.log").get_logger()
         self.unique_features = mobile_features
         self.db_obj = VehicleDatabase(logger=self.log)
-
+        self.thread_limit = Config.MOBILE_THREAD_COUNT
     def _make_request(self, url: str, use_proxy: bool = True) -> Optional[requests.Response]:
         """Make HTTP request with retry logic and error handling"""
         for attempt in range(self.config.max_retries):
@@ -306,7 +305,7 @@ class MobileDeHourlyScraper:
             except Exception as e:
                 self.log.info(f"❌ Error processing listing: {e}")
 
-        with ThreadPoolExecutor(max_workers=self.config.max_workers) as executor:
+        with ThreadPoolExecutor(max_workers=self.thread_limit) as executor:
             futures = [executor.submit(process_single, listing) for listing in listings]
 
             for future in as_completed(futures):
@@ -419,7 +418,6 @@ def main():
         max_pages=50,
         max_retries=5,
         delay_between_requests=.1,
-        max_workers=5
     )
 
     # Initialize and run scraper

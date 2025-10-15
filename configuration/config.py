@@ -17,3 +17,6 @@ class Config:
     DATABASE_NAME = os.getenv('DATABASE_NAME')
 
     SCRAPE_DO_TOKEN = os.getenv('SCRAPE_DO_TOKEN')
+
+    AUTOSCOUT_THREAD_COUNT = int(os.getenv('AUTOSCOUT_THREAD_COUNT'))
+    MOBILE_THREAD_COUNT = int(os.getenv('MOBILE_THREAD_COUNT'))

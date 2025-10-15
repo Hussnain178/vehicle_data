@@ -11,7 +11,8 @@ import threading
 from proxies.webshare import WEBSHARE
 from database.db import VehicleDatabase
 from logger.logger_setup import LoggerSetup
-
+from configuration.config import Config
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 @dataclass
 class ScraperConfig:
@@ -44,6 +45,7 @@ class AutoScout24HourlyScraper:
         self.webshare_obj = WEBSHARE()
         self.unique_features = autoscout24_features
         self.db_obj = VehicleDatabase(logger=self.log)
+        self.thread_limit = Config.AUTOSCOUT_THREAD_COUNT
 
     def _make_request(self, url: str, params: Optional[Dict[str, Any]] = None,
                       is_pagination: bool = False) -> Optional[requests.Response]:
@@ -314,7 +316,6 @@ class AutoScout24HourlyScraper:
 
     def process_listings(self, listings: List[Dict[str, Any]]):
         """Process multiple listings concurrently"""
-        threads = []
         lock = threading.Lock()
 
         def process_single(listing):
@@ -342,15 +343,13 @@ class AutoScout24HourlyScraper:
             except Exception as e:
                 self.log.error(f"❌ Error processing listing: {e}")
 
-        # Create and start threads
-        for listing in listings:
-            t = threading.Thread(target=process_single, args=(listing,))
-            t.start()
-            threads.append(t)
+        with ThreadPoolExecutor(max_workers=self.thread_limit) as executor:
+            # Submit all tasks and collect futures
+            futures = [executor.submit(process_single, listing) for listing in listings]
 
-        # Wait for all threads to complete
-        for t in threads:
-            t.join()
+            # Collect results as they complete
+            for future in as_completed(futures):
+                future.result()
 
     def run(self):
         """Main execution method - fetch latest listings sorted by age"""

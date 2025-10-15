@@ -61,7 +61,7 @@ pip install -r requirements.txt
 ---
 
 ### 4️⃣ Configure Database Connection
-Inside your project, open the **.env** or **constants.env** file and update PostgreSQL credentials:
+Inside your project, open the **.env** or **constants.env** file and update PostgreSQL credentials(PLUS change the threads limits for both scrappers):
 
 ```bash
 SCRAPE_DO_TOKEN=SCRAPE_DO_TOKEN
@@ -76,6 +76,9 @@ DB_USER=postgres
 DB_PASSWORD=yourpassword
 DB_HOST=localhost
 DB_PORT=5432
+
+AUTOSCOUT_THREAD_COUNT=10
+MOBILE_THREAD_COUNT=5
 ```
 
 > 🧠 The script automatically ensures that the database and required tables exist. No manual setup needed.
