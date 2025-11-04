@@ -6,6 +6,7 @@ from configuration.config import Config
 from datetime import datetime
 import time
 
+
 class VehicleDatabase:
     """
     Thread-safe database class for vehicle data operations.
@@ -113,7 +114,7 @@ class VehicleDatabase:
                     self.log.info(f"Creating new connection pool for {pool_key}")
                     self._connection_pools[pool_key] = pool.ThreadedConnectionPool(
                         minconn=1,
-                        maxconn=50,
+                        maxconn=60,
                         dbname=self.database_name,
                         user=self.user,
                         password=self.password,
@@ -373,10 +374,11 @@ class VehicleDatabase:
 
             # Valid columns + date stamps + availability
             valid_columns = (
-                ['unique_id', 'vehicle_id', 'data_source', 'listing_url', 'images'] +
-                [col for col in self.STRING_COLUMNS if col not in ['vehicle_id', 'data_source', 'listing_url', 'images']] +
-                self.BOOL_COLUMNS +
-                ['scraped_at', 'updated_at', 'is_vehicle_available']
+                    ['unique_id', 'vehicle_id', 'data_source', 'listing_url', 'images'] +
+                    [col for col in self.STRING_COLUMNS if
+                     col not in ['vehicle_id', 'data_source', 'listing_url', 'images']] +
+                    self.BOOL_COLUMNS +
+                    ['scraped_at', 'updated_at', 'is_vehicle_available']
             )
 
             filtered_data = {k: v for k, v in insert_data.items() if k in valid_columns}
@@ -552,6 +554,3 @@ def ensure_database_exists(dbname=Config.DATABASE_NAME, user=Config.DATABASE_USE
 
     cur.close()
     conn.close()
-
-
-

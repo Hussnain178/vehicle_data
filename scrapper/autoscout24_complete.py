@@ -24,6 +24,7 @@ class ScraperConfig:
     price_start: int = 0
     price_end: int = 100000
     initial_chunk_size: int = 100
+    batch_pages: int = 3  # Number of pages to fetch before processing
 
 
 @dataclass
@@ -91,10 +92,10 @@ class AutoScout24Scraper:
                     return response
                 else:
                     self.log.warning(
-                        f"⚠️  HTTP {response.status_code} on attempt {attempt + 1}/{self.config.max_retries}")
+                        f"⚠️ HTTP {response.status_code} on attempt {attempt + 1}/{self.config.max_retries}")
 
             except requests.exceptions.Timeout:
-                self.log.error(f"⏱️  Timeout on attempt {attempt + 1}/{self.config.max_retries}")
+                self.log.error(f"⏱️ Timeout on attempt {attempt + 1}/{self.config.max_retries}")
             except requests.exceptions.ConnectionError:
                 self.log.error(f"🔌 Connection error on attempt {attempt + 1}/{self.config.max_retries}")
             except Exception as e:
@@ -164,7 +165,7 @@ class AutoScout24Scraper:
         range_size = end - start
 
         if range_size <= 1:
-            self.log.info(f"⚠️  Cannot split range further: ({start}, {end})")
+            self.log.info(f"⚠️ Cannot split range further: ({start}, {end})")
             return [price_range]
 
         # Calculate chunks with 20% buffer
@@ -262,7 +263,7 @@ class AutoScout24Scraper:
         # Check for duplicate
         if self.db_obj.check_id_exists(listing_id, 'autoscout24'):
             self.db_obj.touch_updated_at(listing_id, 'autoscout24')
-            self.log.info(f"⏭️  Skipping duplicate ID: {listing_id}")
+            self.log.info(f"⭐️ Skipping duplicate ID: {listing_id}")
             self.stats.duplicates_skipped += 1
             return None
 
@@ -274,7 +275,7 @@ class AutoScout24Scraper:
             product_response = self.get_detail_response(url)
 
             if not product_response:
-                self.log.info(f"⚠️  Failed to get details for: {url}")
+                self.log.info(f"⚠️ Failed to get details for: {url}")
                 return basic_data
 
             # Extract description
@@ -347,7 +348,6 @@ class AutoScout24Scraper:
 
     def process_listings(self, listings: List[Dict[str, Any]]):
         """Process multiple listings concurrently (max 20 threads)"""
-        # threads = []
         try:
             lock = threading.Lock()  # for thread-safe updates
 
@@ -373,7 +373,6 @@ class AutoScout24Scraper:
                         self.stats.total_listings += 1
                         self.stats.list_process_per_page += 1
 
-
                 except Exception as e:
                     self.log.error(f"❌ Error processing listing: {e}")
 
@@ -386,18 +385,24 @@ class AutoScout24Scraper:
                     future.result()
         except Exception as e:
             self.log.error(e)
-        # 🔹 Create and start threads
-        # for listing in listings:
-        #     t = threading.Thread(target=process_single, args=(listing,))
-        #     t.start()
-        #     threads.append(t)
-        #     if len(threads) == self.thread_limit:
-        #         for t in threads:
-        #             t.join()
-        #         threads = []
-        # # 🔹 Wait for all threads to complete
-        # for t in threads:
-        #     t.join()
+
+    def fetch_single_page(self, url: str, params: Dict[str, Any], page: int) -> List[Dict[str, Any]]:
+        """Fetch a single page and return its listings"""
+        try:
+            current_response = self.get_pagination_response(url, params)
+
+            if not current_response or 'pageProps' not in current_response:
+                self.log.info(f"  ⚠️ Failed to get page {page}")
+                return []
+
+            listings = current_response['pageProps'].get('listings', [])
+            self.stats.pages_processed += 1
+            self.log.info(f"  📖 Page {page}: fetched {len(listings)} listings")
+
+            return listings
+        except Exception as e:
+            self.log.error(f"❌ Error fetching page {page}: {e}")
+            return []
 
     def process_price_range(self, price_range: Tuple[int, int],
                             extra_params: Optional[Dict[str, Any]] = None) -> None:
@@ -439,7 +444,7 @@ class AutoScout24Scraper:
         self.log.info(f"📈 Found {num_results} results")
 
         if num_results == 0:
-            self.log.info("⏭️  No results, skipping range")
+            self.log.info("⭐️ No results, skipping range")
             return
 
         # Handle range splitting if needed
@@ -454,45 +459,67 @@ class AutoScout24Scraper:
                     self.process_price_range(price_range, filter_params)
                 return
 
-            self.log.info(f"⚠️  Too many results ({num_results}), splitting range...")
+            self.log.info(f"⚠️ Too many results ({num_results}), splitting range...")
             sub_ranges = self.split_range_dynamically(price_range, num_results)
 
             for sub_range in sub_ranges:
                 self.process_price_range(sub_range, extra_params)
             return
 
-        # Process all pages
+        # Process pages in batches
         num_pages = page_props.get('numberOfPages', 1)
-        self.log.info(f"📄 Processing {num_pages} page(s)")
+        self.log.info(f"🔄 Processing {num_pages} page(s) in batches of {self.config.batch_pages}")
 
-        for page in range(1, num_pages + 1):
-            self.log.info(f"  📖 Page {page}/{num_pages}")
+        if num_pages:
+            # Process pages in batches
+            for batch_start in range(1, num_pages + 1, self.config.batch_pages):
+                batch_end = min(batch_start + self.config.batch_pages, num_pages + 1)
+                batch_pages = range(batch_start, batch_end)
 
-            if page == 1:
-                current_response = response
-            else:
-                params['page'] = str(page)
-                current_response = self.get_pagination_response(url, params)
+                self.log.info(f"  📦 Batch: pages {batch_start} to {batch_end - 1}")
 
-            if not current_response or 'pageProps' not in current_response:
-                self.log.info(f"  ⚠️  Failed to get page {page}")
-                continue
+                # Fetch all pages in the batch concurrently
+                all_listings = []
+                batch_size = batch_end - batch_start
+                with ThreadPoolExecutor(max_workers=batch_size) as executor:
+                    futures = []
+                    for page in batch_pages:
+                        page_params = params.copy()
+                        page_params['page'] = str(page)
+                        future = executor.submit(self.fetch_single_page, url, page_params, page)
+                        futures.append(future)
 
-            # Extract listings
-            listings = current_response['pageProps'].get('listings', [])
-            self.process_listings(listings)
-            self.stats.pages_processed += 1
-            self.log.info(
-                f"  ✅ Parsed {self.stats.list_process_per_page} listings (Total: {self.stats.total_listings})")
-            self.stats.list_process_per_page = 0
+                    for future in as_completed(futures):
+                        try:
+                            listings = future.result()
+                            all_listings.extend(listings)
+                        except Exception as e:
+                            self.log.error(f"❌ Error fetching page in batch: {e}")
 
+                # Remove duplicates based on ID
+                unique_listings = {}
+                for listing in all_listings:
+                    listing_id = listing.get('id')
+                    if listing_id and listing_id not in unique_listings:
+                        unique_listings[listing_id] = listing
+
+                duplicates_in_batch = len(all_listings) - len(unique_listings)
+                if duplicates_in_batch > 0:
+                    self.log.info(f"  🔍 Removed {duplicates_in_batch} duplicate listings from batch")
+
+                # Process all unique listings from the batch
+                unique_listings_list = list(unique_listings.values())
+                self.log.info(f"  ⚙️ Processing {len(unique_listings_list)} unique listings from batch")
+                self.process_listings(unique_listings_list)
+
+        self.log.info(f"  ✅ Completed range {price_range} (Total Inserted: {self.stats.total_listings})")
         self.stats.ranges_processed += 1
 
     def run(self):
         """Main execution method"""
         self.log.info("🚀 Starting AutoScout24 scraping...")
-        self.log.info(f"⚙️  Config: €{self.config.price_start}-€{self.config.price_end}, "
-                      f"chunk size: €{self.config.initial_chunk_size}")
+        self.log.info(f"⚙️ Config: €{self.config.price_start}-€{self.config.price_end}, "
+                      f"chunk size: €{self.config.initial_chunk_size}, batch pages: {self.config.batch_pages}")
         start_date = datetime.now().strftime("%d-%m-%Y")
         start_time = time.time()
         price_ranges = self.generate_price_ranges()
@@ -506,7 +533,7 @@ class AutoScout24Scraper:
                 self.process_price_range(price_range)
 
             except KeyboardInterrupt:
-                self.log.error("\n\n⚠️  Scraping interrupted by user")
+                self.log.error("\n\n⚠️ Scraping interrupted by user")
                 break
             except Exception as e:
                 self.log.error(f"❌ Error processing range {price_range}: {str(e)[:200]}")
@@ -519,12 +546,12 @@ class AutoScout24Scraper:
         self.log.info("📊 SCRAPING COMPLETED")
         self.log.info(f"{'=' * 60}")
         self.log.info(f"✅ Total listings collected: {self.stats.total_listings}")
-        self.log.info(f"⏭️  Duplicates skipped: {self.stats.duplicates_skipped}")
-        self.log.info(f"📄 Pages processed: {self.stats.pages_processed}")
+        self.log.info(f"⭐️ Duplicates skipped: {self.stats.duplicates_skipped}")
+        self.log.info(f"🔄 Pages processed: {self.stats.pages_processed}")
         self.log.info(f"📦 Ranges processed: {self.stats.ranges_processed}")
         self.log.info(f"🌐 Total requests: {self.stats.total_requests}")
         self.log.info(f"❌ Failed requests: {self.stats.failed_requests}")
-        self.log.info(f"⏱️  Time elapsed: {elapsed_time:.2f} seconds")
+        self.log.info(f"⏱️ Time elapsed: {elapsed_time:.2f} seconds")
         if elapsed_time > 0:
             self.log.info(f"⚡ Average: {self.stats.total_listings / elapsed_time:.2f} listings/sec")
         self.log.info(f"{'=' * 60}")
@@ -539,9 +566,13 @@ def main():
         initial_chunk_size=100,
         max_retries=3,
         delay_between_requests=.01,
-        max_results_per_range=4000
+        max_results_per_range=4000,
+        batch_pages=3  # Process 3 pages at a time
     )
 
     # Initialize and run scraper
     scraper = AutoScout24Scraper(config)
     scraper.run()
+
+
+
