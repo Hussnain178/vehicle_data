@@ -90,7 +90,7 @@ class MobileDeScraper:
 
                 if use_proxy:
                     target_url = quote(url)
-                    proxy_url = f"http://api.scrape.do/?url={target_url}&token={self.config.scrape_do_token}"
+                    proxy_url = f"http://api.scrape.do/?url={target_url}&token={self.config.scrape_do_token}&super=true"
                     response = requests.get(proxy_url, timeout=30)
                 else:
                     response = requests.get(url, timeout=30)
