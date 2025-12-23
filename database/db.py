@@ -214,7 +214,7 @@ class VehicleDatabase:
                 "unique_id VARCHAR(500) PRIMARY KEY NOT NULL",
                 "vehicle_id VARCHAR(255) NOT NULL",
                 "data_source VARCHAR(255) NOT NULL",
-                "listing_url VARCHAR(255) NOT NULL",
+                "listing_url TEXT NOT NULL",
                 "images JSON",
                 # timestamps
                 "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP",

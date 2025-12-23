@@ -273,7 +273,7 @@ class MobileDeHourlyScraper:
                     if new_key:
                         basic_data[new_key] = value
 
-            self.log.info(f"✅ Parsed: {basic_data.get('title', 'Unknown')[:50]} - €{basic_data.get('price', 'N/A')}")
+            self.log.info(f"✅ Parsed: {basic_data.get('title', 'Unknown')[:50]} - €{basic_data.get('price', 'N/A')} | Url: {basic_data.get('url')}")
             return basic_data
 
         except Exception as e:
@@ -298,9 +298,12 @@ class MobileDeHourlyScraper:
                     final_data = convert_vehicle_data(detailed_data, 'mobile')
 
                     with lock:
-                        self.db_obj.insert_vehicle(final_data)
-                        self.stats.total_listings += 1
-                        self.stats.list_process_per_page += 1
+                        if self.db_obj.insert_vehicle(final_data):
+                            self.stats.total_listings += 1
+                            self.stats.list_process_per_page += 1
+                        else:
+                            self.log.errpr(
+                                f"✅ Issue while Inserting: {basic_data.get('title', 'Unknown')[:50]} - €{basic_data.get('price', 'N/A')} | Url: {basic_data.get('url')}")
 
             except Exception as e:
                 self.log.info(f"❌ Error processing listing: {e}")
