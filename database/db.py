@@ -64,7 +64,18 @@ class VehicleDatabase:
                       'tracking_boosting_product', 'tracking_relevance_adjustment', 'tracking_boost_level',
                       'tracking_applied_boost_level', 'tracking_order_bucket', 'tracking_topspot_algorithm',
                       'tracking_topspot_dealer_id', 'attr_c', 'attr_con', 'attr_nw', 'attr_bc', 'attr_yc',
-                      'airbag', 'vehicle_co2_class', 'park_assist_mobile', 'export', 'sliding_door_type']
+                      'airbag', 'vehicle_co2_class', 'park_assist_mobile', 'export', 'sliding_door_type',
+                      # new str keys
+                      'property_updatedAt', 'convertible_top_type', 'residual_value', 'tyre_type',
+                      'maker_warranty_valid_until_km', 'battery_type', 'cant_see_my_version',
+                      'vendors_warranty_valid_until_date', 'originalCreatedAt', 'maker_warranty_valid_until_date',
+                      'electric_power_peak', 'max_charging_power', 'brake_energy_recovery', 'charging_connector_type',
+                      'system_performance_of_hybrid_driveline_in_hp', 'charging_time_home', 'charging_current_type',
+                      'lease_url', 'number_engines', 'remaining_payments', 'vehicle_title', 'headlight_lamp_type',
+                      'sunblind_type', 'charging_time_80', 'monthly_payment', 'catalog_urn', 'battery_condition',
+                      'property_created_at', 'deactivation_reason_id', 'video', 'down_payment','alloy_wheels_type',
+                      'cruisecontrol_type','sunroof_type'
+                      ]
 
     BOOL_COLUMNS = ['particle_filter', 'new_inspection', 'service_book_maintained', 'non_smoking_vehicle',
                     'battery_certificate', 'double_cab', 'awning', 'sliding_door', 'sliding_door_right',
@@ -97,7 +108,31 @@ class VehicleDatabase:
                     'winter_tires', 'spare_wheel', 'emergency_wheel', 'tire_repair_kit', 'catalytic_converter',
                     'e10_compatible', 'all_wheel_drive', 'front_wheel_drive', 'rear_wheel_drive', 'warranty',
                     'right_hand_drive', 'taxi', 'disabled_accessible', 'smoker_package', 'leather_interior',
-                    'paddle_shifters']
+                    'paddle_shifters',
+                    # new bool keys
+                    'energy_recovery_system', 'rear_transversal_curtain_airbag', 'leasing_concession',
+                    'lumbar_adjust_passenger_electric', 'pause_recommendation_warning', 'top_electrically_operated',
+                    'vat', 'acoustic_vehicle_alerting_system', 'has_vin', 'electronic_controlled_suspension',
+                    'front_airbags_for_rear_seats', 'city_emergency_brake_assist', 'vehicle_charging_cable',
+                    'intersection_assist', 'air_condition_rear', 'adjustable_suspension',
+                    'driver_conditioning_monitoring', 'pre_crash_sound_system', 'windscreenwiper_other',
+                    'rear_pre_crash_system', 'vat_discount', 'power_windows_rear', 'quick_charging_function',
+                    'historical_vehicle', 'side_pre_crash_system', 'approval_for_goods', 'led_rear_lights',
+                    'active_driver_conditioning_monitoring', 'is_imported_car', 'runflat_tyres',
+                    'rear_cross_traffic_alert', 'top_remote_controlled', 'knee_airbag_driver', 'rear_seat_with_massage',
+                    'comfort_suspension', 'financial_option', 'collision_warning_system', 'pre_crash_system',
+                    'selectable_central_differential_characteristics', 'keyless_entry', 'automatic_dimlight_activation',
+                    'knee_airbag_passenger', 'front_seat_with_massage', 'pedestrian_emergency_brake_assist',
+                    'ceramic_composite_brakes', 'limited_slip_differential_in_general', 'ventilated_rear_seat',
+                    'autorenew', 'leather_gearshifterswitch', 'active_lane_change_assistant',
+                    'distribution_of_braking_force_electronically', 'follow_me_home', 'power_assisted_brakes',
+                    'curve_trace_assistant', 'basic_autonomous_driving', 'hill_descent_control', 'door_mirrors_heated',
+                    'power_windows_front', 'sports_steering_wheel', 'keyless_engine_start', 'digital_key',
+                    'hydro_pneumatic_suspension', 'door_mirror_camera',
+                    'door_mirror_electrically_adjustable_in_general', 'steering_wheel_electrically_adjustable',
+                    'central_airbag_driver_and_passenger', 'traffic_jam_assist', 'number_batteries',
+                    'seat_belt_airbag_rear', 'keyless_go', 'roll_over_protection_system'
+                    ]
 
     def __init__(self, logger, schema_name: str = "vehicle_marketplace", table_name: str = "vehicle_data"):
         self.log = logger
@@ -203,14 +238,15 @@ class VehicleDatabase:
                 self._put_connection(conn)
 
     def create_table_if_not_exists(self):
-        """Create table if it doesn't exist (DATE columns scraped_at & updated_at, availability flag)."""
+        """Create table if it doesn't exist, or update it with new columns if they're missing."""
         conn = None
         cursor = None
         try:
             conn = self._get_connection()
             cursor = conn.cursor()
 
-            columns = [
+            # Define core columns that should always exist
+            core_columns = [
                 "unique_id VARCHAR(500) PRIMARY KEY NOT NULL",
                 "vehicle_id VARCHAR(255) NOT NULL",
                 "data_source VARCHAR(255) NOT NULL",
@@ -227,12 +263,13 @@ class VehicleDatabase:
             # Add string columns (nullable)
             for col in self.STRING_COLUMNS:
                 if col not in ['vehicle_id', 'data_source', 'listing_url', 'images']:
-                    columns.append(f"{col} TEXT")
+                    core_columns.append(f"{col} TEXT")
 
             # Add boolean columns (nullable)
             for col in self.BOOL_COLUMNS:
-                columns.append(f"{col} BOOLEAN")
+                core_columns.append(f"{col} BOOLEAN")
 
+            # Create table if it doesn't exist
             create_table_query = sql.SQL("""
                 CREATE TABLE IF NOT EXISTS {}.{} (
                     {}
@@ -240,15 +277,51 @@ class VehicleDatabase:
             """).format(
                 sql.Identifier(self.schema_name),
                 sql.Identifier(self.table_name),
-                sql.SQL(',\n                    ').join(map(sql.SQL, columns))
+                sql.SQL(',\n                ').join(map(sql.SQL, core_columns))
             )
 
             cursor.execute(create_table_query)
             conn.commit()
             self.log.info(f"Table '{self.schema_name}.{self.table_name}' checked/created successfully")
 
+            # Check for missing columns and add them if necessary
+            cursor.execute(sql.SQL("""
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_schema = {} AND table_name = {}
+            """).format(
+                sql.Literal(self.schema_name),
+                sql.Literal(self.table_name)
+            ))
+
+            existing_columns = {row[0] for row in cursor.fetchall()}
+
+            # Check and add missing STRING_COLUMNS
+            for col in self.STRING_COLUMNS:
+                if col not in ['vehicle_id', 'data_source', 'listing_url', 'images'] and col not in existing_columns:
+                    alter_query = sql.SQL("ALTER TABLE {}.{} ADD COLUMN {} TEXT").format(
+                        sql.Identifier(self.schema_name),
+                        sql.Identifier(self.table_name),
+                        sql.Identifier(col)
+                    )
+                    cursor.execute(alter_query)
+                    self.log.info(f"Added new TEXT column: {col}")
+
+            # Check and add missing BOOL_COLUMNS
+            for col in self.BOOL_COLUMNS:
+                if col not in existing_columns:
+                    alter_query = sql.SQL("ALTER TABLE {}.{} ADD COLUMN {} BOOLEAN").format(
+                        sql.Identifier(self.schema_name),
+                        sql.Identifier(self.table_name),
+                        sql.Identifier(col)
+                    )
+                    cursor.execute(alter_query)
+                    self.log.info(f"Added new BOOLEAN column: {col}")
+
+            conn.commit()
+
         except Exception as e:
-            self.log.error(f"ERROR: Failed to create table: {e}")
+            self.log.error(f"ERROR: Failed to create/update table: {e}")
             if conn:
                 conn.rollback()
             raise

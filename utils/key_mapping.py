@@ -1,1333 +1,571 @@
-KEY_MAPPING = {
-    "vehicle_id": {
-        "autoscout24": "id",
-        "mobile": "id"
-    },
-    "listing_url": {
-        "autoscout24": "url",
-        "mobile": "url"
-    },
-    "title": {
-        "autoscout24": "title",
-        "mobile": "title"
-    },
-    "subtitle": {
-        "autoscout24": "vehicle_subtitle",
-        "mobile": None
-    },
-    "price": {
-        "autoscout24": "price",
-        "mobile": "price"
-    },
-    "price_info": {
-        "autoscout24": "price_text",
-        "mobile": None
-    },
-    "price_label": {
-        "autoscout24": "tracking_priceLabel",
-        "mobile": None
-    },
-    "make": {
-        "autoscout24": "vehicle_make",
-        "mobile": "vehicle_make"
-    },
-    "model": {
-        "autoscout24": "vehicle_model",
-        "mobile": "vehicle_model"
-    },
-    "model_version": {
-        "autoscout24": "vehicle_modelVersionInput",
-        "mobile": "vehicle_modelVersionInput"
-    },
-    "model_range": {
-        "autoscout24": None,
-        "mobile": "modelRange"
-    },
-    "trim_line": {
-        "autoscout24": None,
-        "mobile": "trimLine"
-    },
-    "vehicle_type": {
-        "autoscout24": "vehicle_articleType",
-        "mobile": "vc"
-    },
-    "category": {
-        "autoscout24": None,
-        "mobile": "category"
-    },
-    "body_type": {
-        "autoscout24": "bodyType",
-        "mobile": None
-    },
-    "make_id": {
-        "autoscout24": "makeId",
-        "mobile": None
-    },
-    "model_id": {
-        "autoscout24": "modelId",
-        "mobile": None
-    },
-    "model_generation_id": {
-        "autoscout24": "modelGenerationId",
-        "mobile": None
-    },
-    "model_variant_id": {
-        "autoscout24": "modelVariantId",
-        "mobile": None
-    },
-    "motor_type_id": {
-        "autoscout24": "motorTypeId",
-        "mobile": None
-    },
-    "trim_line_id": {
-        "autoscout24": "trimLineId",
-        "mobile": None
-    },
-    "sku": {
-        "autoscout24": None,
-        "mobile": "sku"
-    },
-    "hsn_tsn": {
-        "autoscout24": "hsnTsn",
-        "mobile": None
-    },
-    "identifier": {
-        "autoscout24": "identifier",
-        "mobile": None
-    },
-    "power_kw": {
-        "autoscout24": "rawPowerInKw",
-        "mobile": None
-    },
-    "power_hp": {
-        "autoscout24": "rawPowerInHp",
-        "mobile": None
-    },
-    "power_display": {
-        "autoscout24": "vehicle_detail_power",
-        "mobile": "Power (HP)"
-    },
-    "power_kw_display": {
-        "autoscout24": "powerInKw",
-        "mobile": None
-    },
-    "power_hp_display": {
-        "autoscout24": "powerInHp",
-        "mobile": None
-    },
-    "displacement_ccm": {
-        "autoscout24": "rawDisplacementInCCM",
-        "mobile": None
-    },
-    "displacement_display": {
-        "autoscout24": "displacementInCCM",
-        "mobile": "Displacement"
-    },
-    "cylinders": {
-        "autoscout24": "cylinders",
-        "mobile": "cylinder"
-    },
-    "gears": {
-        "autoscout24": "gears",
-        "mobile": None
-    },
-    "weight": {
-        "autoscout24": "weight",
-        "mobile": None
-    },
-    "net_weight": {
-        "autoscout24": None,
-        "mobile": "netWeight"
-    },
-    "fuel_type": {
-        "autoscout24": "vehicle_fuel",
-        "mobile": "Fuel Type"
-    },
-    "fuel_category": {
-        "autoscout24": "fuelCategory",
-        "mobile": None
-    },
-    "primary_fuel": {
-        "autoscout24": "primaryFuel",
-        "mobile": None
-    },
-    "transmission": {
-        "autoscout24": "vehicle_transmission",
-        "mobile": "Transmission Type"
-    },
-    "air_conditioning_type": {
-        "autoscout24": None,
-        "mobile": "climatisation"
-    },
-    "transmission_type": {
-        "autoscout24": "transmissionType",
-        "mobile": None
-    },
-    "drive_train": {
-        "autoscout24": "driveTrain",
-        "mobile": None
-    },
-    "has_particle_filter": {
-        "autoscout24": "hasParticleFilter",
-        "mobile": None
-    },
-    "particle_filter": {
-        "autoscout24": None,
-        "mobile": "Partikelfilter"
-    },
-    "fuel_consumption_combined": {
-        "autoscout24": "fuelConsumptionCombined",
-        "mobile": None
-    },
-    "fuel_consumption_urban": {
-        "autoscout24": "fuelConsumptionUrban",
-        "mobile": None
-    },
-    "fuel_consumption_extra_urban": {
-        "autoscout24": "fuelConsumptionExtraUrban",
-        "mobile": None
-    },
-    "co2_emission": {
-        "autoscout24": "vehicle_detail_co2_emission",
-        "mobile": "CO2 in g per km"
-    },
-    "co2_emission_combined": {
-        "autoscout24": "co2emissionInGramPerKmWithFallback",
-        "mobile": None
-    },
-    "co2_emissions_combined_fallback": {
-        "autoscout24": "co2EmissionsCombinedWithFallback",
-        "mobile": None
-    },
-    "co2_emissions_combined_weighted": {
-        "autoscout24": "co2EmissionsCombinedWeightedWithFallback",
-        "mobile": None
-    },
-    "co2_emissions_discharged": {
-        "autoscout24": "co2EmissionsDischarged",
-        "mobile": None
-    },
-    "co2_class": {
-        "autoscout24": "co2ClassWithFallback",
-        "mobile": "EU CO2 Class"
-    },
-    "co2_class_discharged": {
-        "autoscout24": "co2ClassDischarged",
-        "mobile": None
-    },
-    "emission_sticker": {
-        "autoscout24": None,
-        "mobile": "emissionsSticker"
-    },
-    "emission_standard": {
-        "autoscout24": None,
-        "mobile": "attr_emc"
-    },
-    "consumption_combined": {
-        "autoscout24": "consumptionCombinedWithFallback",
-        "mobile": None
-    },
-    "consumption_combined_weighted": {
-        "autoscout24": "consumptionCombinedWeightedWithFallback",
-        "mobile": None
-    },
-    "consumption_combined_discharged": {
-        "autoscout24": "consumptionCombinedDischarged",
-        "mobile": None
-    },
-    "consumption_electric_combined": {
-        "autoscout24": "consumptionElectricCombinedWithFallback",
-        "mobile": None
-    },
-    "consumption_electric_combined_weighted": {
-        "autoscout24": "consumptionElectricCombinedWeightedWithFallback",
-        "mobile": None
-    },
-    "consumption_city": {
-        "autoscout24": "consumptionCity",
-        "mobile": None
-    },
-    "consumption_city_discharged": {
-        "autoscout24": "consumptionCityDischarged",
-        "mobile": None
-    },
-    "consumption_suburban": {
-        "autoscout24": "consumptionSuburban",
-        "mobile": None
-    },
-    "consumption_suburban_discharged": {
-        "autoscout24": "consumptionSuburbanDischarged",
-        "mobile": None
-    },
-    "consumption_rural": {
-        "autoscout24": "consumptionRural",
-        "mobile": None
-    },
-    "consumption_rural_discharged": {
-        "autoscout24": "consumptionRuralDischarged",
-        "mobile": None
-    },
-    "consumption_highway": {
-        "autoscout24": "consumptionHighway",
-        "mobile": None
-    },
-    "consumption_highway_discharged": {
-        "autoscout24": "consumptionHighwayDischarged",
-        "mobile": None
-    },
-    "consumption_electric_city": {
-        "autoscout24": "consumptionElectricCity",
-        "mobile": None
-    },
-    "consumption_electric_suburban": {
-        "autoscout24": "consumptionElectricSuburban",
-        "mobile": None
-    },
-    "consumption_electric_rural": {
-        "autoscout24": "consumptionElectricRural",
-        "mobile": None
-    },
-    "consumption_electric_highway": {
-        "autoscout24": "consumptionElectricHighway",
-        "mobile": None
-    },
-    "environment_pkw_envkv": {
-        "autoscout24": "environmentPkwEnVKV",
-        "mobile": None
-    },
-    "environment_eu_directive": {
-        "autoscout24": "environmentEuDirective",
-        "mobile": None
-    },
-    "environment_bimschv35": {
-        "autoscout24": "environmentBImSchV35",
-        "mobile": None
-    },
-    "wltp": {
-        "autoscout24": "wltp",
-        "mobile": None
-    },
-    "energy_consumption": {
-        "autoscout24": None,
-        "mobile": "envkv.energyConsumption"
-    },
-    "consumption_costs": {
-        "autoscout24": "consumptionCosts",
-        "mobile": "envkv.consumptionCosts"
-    },
-    "consumption_costs_year": {
-        "autoscout24": "consumptionCostsYear",
-        "mobile": None
-    },
-    "fuel_price": {
-        "autoscout24": "fuelPrice",
-        "mobile": "envkv.fuel.price"
-    },
-    "co2_costs": {
-        "autoscout24": None,
-        "mobile": "envkv.co2Costs"
-    },
-    "co2_costs_average": {
-        "autoscout24": "co2CostsAverage",
-        "mobile": None
-    },
-    "co2_costs_high": {
-        "autoscout24": "co2CostsHigh",
-        "mobile": None
-    },
-    "co2_costs_low": {
-        "autoscout24": "co2CostsLow",
-        "mobile": None
-    },
-    "vehicle_tax": {
-        "autoscout24": "vehicleTax",
-        "mobile": "envkv.tax"
-    },
-    "engine_type": {
-        "autoscout24": None,
-        "mobile": "envkv.engineType"
-    },
-    "other_energy_source": {
-        "autoscout24": None,
-        "mobile": "envkv.otherEnergySource"
-    },
-    "mileage_km": {
-        "autoscout24": "mileageInKmRaw",
-        "mobile": None
-    },
-    "mileage_display": {
-        "autoscout24": "vehicle_mileageInKm",
-        "mobile": "Milage"
-    },
-    "mileage_detail": {
-        "autoscout24": "vehicle_detail_mileage",
-        "mobile": None
-    },
-    "mileage_in_km": {
-        "autoscout24": "mileageInKm",
-        "mobile": None
-    },
-    "first_registration": {
-        "autoscout24": "vehicle_detail_first_registration",
-        "mobile": "First Registration"
-    },
-    "first_registration_raw": {
-        "autoscout24": "firstRegistrationDateRaw",
-        "mobile": None
-    },
-    "first_registration_date": {
-        "autoscout24": "firstRegistrationDate",
-        "mobile": None
-    },
-    "production_year": {
-        "autoscout24": "productionYear",
-        "mobile": None
-    },
-    "construction_year": {
-        "autoscout24": None,
-        "mobile": "constructionYear"
-    },
-    "last_inspection": {
-        "autoscout24": None,
-        "mobile": "Last inspection"
-    },
-    "next_inspection": {
-        "autoscout24": "nextVehicleSafetyInspection",
-        "mobile": None
-    },
-    "new_inspection": {
-        "autoscout24": "newInspection",
-        "mobile": "Inspektion neu"
-    },
-    "last_service_date": {
-        "autoscout24": "lastTechnicalServiceDate",
-        "mobile": "lastMaintenanceDate"
-    },
-    "last_service_mileage": {
-        "autoscout24": None,
-        "mobile": "lastMaintenanceMileage"
-    },
-    "last_belt_service": {
-        "autoscout24": "lastBeltServiceDate",
-        "mobile": None
-    },
-    "full_service_history": {
-        "autoscout24": "hasFullServiceHistory",
-        "mobile": None
-    },
-    "service_book_maintained": {
-        "autoscout24": None,
-        "mobile": "Scheckheftgepflegt"
-    },
-    "offer_type": {
-        "autoscout24": "vehicle_offerType",
-        "mobile": None
-    },
-    "condition": {
-        "autoscout24": None,
-        "mobile": "damageCondition"
-    },
-    "damage_condition": {
-        "autoscout24": None,
-        "mobile": "attr_subc"
-    },
-    "had_accident": {
-        "autoscout24": "hadAccident",
-        "mobile": None
-    },
-    "previous_owners": {
-        "autoscout24": "noOfPreviousOwners",
-        "mobile": "attr_pvo"
-    },
-    "is_rental": {
-        "autoscout24": "isRental",
-        "mobile": None
-    },
-    "non_smoking": {
-        "autoscout24": "nonSmoking",
-        "mobile": None
-    },
-    "non_smoking_vehicle": {
-        "autoscout24": None,
-        "mobile": "Nichtraucher-Fahrzeug"
-    },
-    "has_registration": {
-        "autoscout24": "hasCarRegistration",
-        "mobile": None
-    },
-    "new_driver_suitable": {
-        "autoscout24": "newDriverSuitable",
-        "mobile": None
-    },
-    "country_version": {
-        "autoscout24": None,
-        "mobile": "Country version"
-    },
-    "original_market": {
-        "autoscout24": "originalMarket",
-        "mobile": None
-    },
-    "type": {
-        "autoscout24": "type",
-        "mobile": None
-    },
-    "seats": {
-        "autoscout24": "numberOfSeats",
-        "mobile": "# of Seats"
-    },
-    "doors": {
-        "autoscout24": "numberOfDoors",
-        "mobile": "# of doors"
-    },
-    "color": {
-        "autoscout24": "bodyColor",
-        "mobile": "Exterior Color"
-    },
-    "color_original": {
-        "autoscout24": "bodyColorOriginal",
-        "mobile": None
-    },
-    "manufacturer_color": {
-        "autoscout24": None,
-        "mobile": "manufacturerColorName"
-    },
-    "paint_type": {
-        "autoscout24": "paintType",
-        "mobile": None
-    },
-    "upholstery": {
-        "autoscout24": "upholstery",
-        "mobile": None
-    },
-    "upholstery_color": {
-        "autoscout24": "upholsteryColor",
-        "mobile": None
-    },
-    "interior": {
-        "autoscout24": None,
-        "mobile": "interior"
-    },
-    "interior_color": {
-        "autoscout24": None,
-        "mobile": "interior_color"
-    },
-    "interior_type": {
-        "autoscout24": None,
-        "mobile": "interior_type"
-    },
-    "vehicle_model_id": {
-        "autoscout24": "vehicle_modelId",
-        "mobile": None
-    },
-    "vehicle_transmission": {
-        "autoscout24": "vehicle_detail_transmission",
-        "mobile": None
-    },
-    "vehicle_fuel_type": {
-        "autoscout24": "vehicle_detail_fuel",
-        "mobile": None
-    },
-    "vehicle_fuel_consumption": {
-        "autoscout24": "vehicle_detail_fuel_consumption",
-        "mobile": None
-    },
-    "model_or_line_id": {
-        "autoscout24": "modelOrModelLineId",
-        "mobile": None
-    },
-    "wheel_base": {
-        "autoscout24": "wheelBase",
-        "mobile": None
-    },
-    "total_height": {
-        "autoscout24": "totalHeight",
-        "mobile": None
-    },
-    "total_width": {
-        "autoscout24": "totalWidth",
-        "mobile": None
-    },
-    "total_length": {
-        "autoscout24": "totalLength",
-        "mobile": None
-    },
-    "gross_vehicle_weight": {
-        "autoscout24": "grossVehicleWeight",
-        "mobile": None
-    },
-    "gross_vehicle_weight_detail": {
-        "autoscout24": "vehicle_detail_zul._gesamtgewicht",
-        "mobile": None
-    },
-    "payload": {
-        "autoscout24": "payload",
-        "mobile": None
-    },
-    "load_width": {
-        "autoscout24": "loadWidth",
-        "mobile": None
-    },
-    "load_height": {
-        "autoscout24": "loadHeight",
-        "mobile": None
-    },
-    "load_length": {
-        "autoscout24": "loadLength",
-        "mobile": None
-    },
-    "load_volume": {
-        "autoscout24": "loadVolume",
-        "mobile": None
-    },
-    "trailer_load_braked": {
-        "autoscout24": None,
-        "mobile": "trailerLoadBraked"
-    },
-    "trailer_load_unbraked": {
-        "autoscout24": None,
-        "mobile": "trailerLoadUnbraked"
-    },
-    "max_towing_weight": {
-        "autoscout24": "maximumTowingWeight",
-        "mobile": None
-    },
-    "max_nose_weight": {
-        "autoscout24": None,
-        "mobile": "maxNoseWeight"
-    },
-    "fuel_tank_volume": {
-        "autoscout24": None,
-        "mobile": "fuelTankVolume"
-    },
-    "battery_ownership": {
-        "autoscout24": "batteryOwnershipType",
-        "mobile": None
-    },
-    "battery_charging_time": {
-        "autoscout24": "batteryChargingTime",
-        "mobile": None
-    },
-    "battery_capacity": {
-        "autoscout24": None,
-        "mobile": "batteryCapacity"
-    },
-    "battery_certificate": {
-        "autoscout24": "Batteriezertifikat",
-        "mobile": "Batteriezertifikat"
-    },
-    "battery": {
-        "autoscout24": None,
-        "mobile": "battery"
-    },
-    "electric_range": {
-        "autoscout24": "electricRangeWithFallback",
-        "mobile": None
-    },
-    "electric_range_city": {
-        "autoscout24": "electricRangeCity",
-        "mobile": None
-    },
-    "number_of_beds": {
-        "autoscout24": "numberOfBeds",
-        "mobile": None
-    },
-    "number_of_axles": {
-        "autoscout24": "numberOfAxles",
-        "mobile": None
-    },
-    "vehicle_art": {
-        "autoscout24": "vehicle_detail_fahrzeugart",
-        "mobile": "vehicle_detail_fahrzeugart"
-    },
-    "double_cab": {
-        "autoscout24": "Doppelkabine",
-        "mobile": "Doppelkabine"
-    },
-    "awning": {
-        "autoscout24": "Markise",
-        "mobile": "Markise"
-    },
-    "sliding_door_type": {
-        "autoscout24": None,
-        "mobile": "slidingDoor"
-    },
-    "sliding_door": {
-        "autoscout24": "Schiebetür",
-        "mobile": None
-    },
-    "sliding_door_right": {
-        "autoscout24": "Schiebetür rechts",
-        "mobile": None
-    },
-    "sliding_door_left": {
-        "autoscout24": "Schiebetür links",
-        "mobile": None
-    },
-    "country_code": {
-        "autoscout24": "location_countryCode",
-        "mobile": "Country Code"
-    },
-    "postal_code": {
-        "autoscout24": "location_zip",
-        "mobile": "Postal Code"
-    },
-    "city": {
-        "autoscout24": "location_city",
-        "mobile": "City"
-    },
-    "street": {
-        "autoscout24": "location_street",
-        "mobile": None
-    },
-    "seller_name": {
-        "autoscout24": "seller_name",
-        "mobile": "seller_name"
-    },
-    "license_plate": {
-        "autoscout24": "licensePlate",
-        "mobile": None
-    },
-    "images": {
-        "autoscout24": "images",
-        "mobile": "images"
-    },
-    "description": {
-        "autoscout24": "description",
-        "mobile": "description"
-    },
-    "carpass_mileage_url": {
-        "autoscout24": "carpassMileageUrl",
-        "mobile": None
-    },
-    "tracking_first_registration": {
-        "autoscout24": "tracking_firstRegistration",
-        "mobile": None
-    },
-    "tracking_fuel_type": {
-        "autoscout24": "tracking_fuelType",
-        "mobile": None
-    },
-    "tracking_image_content": {
-        "autoscout24": "tracking_imageContent",
-        "mobile": None
-    },
-    "tracking_smyle_eligible": {
-        "autoscout24": "tracking_isSmyleEligible",
-        "mobile": None
-    },
-    "tracking_mileage": {
-        "autoscout24": "tracking_mileage",
-        "mobile": None
-    },
-    "tracking_price": {
-        "autoscout24": "tracking_price",
-        "mobile": None
-    },
-    "tracking_model_taxonomy": {
-        "autoscout24": "tracking_modelTaxonomy",
-        "mobile": None
-    },
-    "tracking_boosting_product": {
-        "autoscout24": "tracking_boosting_product",
-        "mobile": None
-    },
-    "tracking_relevance_adjustment": {
-        "autoscout24": "tracking_relevance_adjustment",
-        "mobile": None
-    },
-    "tracking_boost_level": {
-        "autoscout24": "tracking_boost_level",
-        "mobile": None
-    },
-    "tracking_applied_boost_level": {
-        "autoscout24": "tracking_applied_boost_level",
-        "mobile": None
-    },
-    "tracking_order_bucket": {
-        "autoscout24": "tracking_orderBucket",
-        "mobile": None
-    },
-    "tracking_topspot_algorithm": {
-        "autoscout24": "tracking_topspot_algorithm",
-        "mobile": None
-    },
-    "tracking_topspot_dealer_id": {
-        "autoscout24": "tracking_topspot_dealer_id",
-        "mobile": None
-    },
-    "attr_c": {
-        "autoscout24": None,
-        "mobile": "attr_c"
-    },
-    "attr_con": {
-        "autoscout24": None,
-        "mobile": "attr_con"
-    },
-    "attr_nw": {
-        "autoscout24": None,
-        "mobile": "attr_nw"
-    },
-    "attr_bc": {
-        "autoscout24": None,
-        "mobile": "attr_bc"
-    },
-    "attr_yc": {
-        "autoscout24": None,
-        "mobile": "attr_yc"
-    },
-    "abs": {
-        "autoscout24": "ABS",
-        "mobile": "ABS"
-    },
-    "esp": {
-        "autoscout24": "ESP",
-        "mobile": "ESP"
-    },
-    "traction_control": {
-        "autoscout24": "Traktionskontrolle",
-        "mobile": "Traktionskontrolle"
-    },
-    "driver_airbag": {
-        "autoscout24": "Fahrerairbag",
-        "mobile": None
-    },
-    "passenger_airbag": {
-        "autoscout24": "Beifahrerairbag",
-        "mobile": None
-    },
-    "side_airbag": {
-        "autoscout24": "Seitenairbag",
-        "mobile": None
-    },
-    "head_airbag": {
-        "autoscout24": "Kopfairbag",
-        "mobile": None
-    },
-    "rear_airbag": {
-        "autoscout24": "Airbag hinten",
-        "mobile": None
-    },
-    "airbag": {
-        "autoscout24": None,
-        "mobile": "airbag"
-    },
-    "immobilizer": {
-        "autoscout24": "Wegfahrsperre",
-        "mobile": "Elektr. Wegfahrsperre"
-    },
-    "emergency_brake_assist": {
-        "autoscout24": "Notbremsassistent",
-        "mobile": "Notbremsassistent"
-    },
-    "blind_spot_assist": {
-        "autoscout24": "Totwinkel-Assistent",
-        "mobile": "Totwinkel-Assistent"
-    },
-    "lane_assist": {
-        "autoscout24": "Spurhalteassistent",
-        "mobile": "Spurhalteassistent"
-    },
-    "distance_warning": {
-        "autoscout24": "Abstandswarner",
-        "mobile": "Abstandswarner"
-    },
-    "traffic_sign_recognition": {
-        "autoscout24": "Verkehrszeichenerkennung",
-        "mobile": "Verkehrszeichenerkennung"
-    },
-    "luggage_partition": {
-        "autoscout24": "Gepäckraumabtrennung",
-        "mobile": None
-    },
-    "folding_rear_seat": {
-        "autoscout24": "teilb. Rücksitzbank",
-        "mobile": None
-    },
-    "lumbar_support": {
-        "autoscout24": "Lordosenstütze",
-        "mobile": None
-    },
-    "tow_bar": {
-        "autoscout24": "Anhängerkupplung",
-        "mobile": None
-    },
-    "wireless_phone_charging": {
-        "autoscout24": "Induktionsladen für Smartphones",
-        "mobile": None
-    },
-    "keyless_central_locking": {
-        "autoscout24": "Schlüssellose Zentralverriegelung",
-        "mobile": None
-    },
-    "seat_ventilation": {
-        "autoscout24": "Sitzbelüftung",
-        "mobile": None
-    },
-    "vehicle_co2_class": {
-        "autoscout24": "vehicle_detail_co₂-klasse",
-        "mobile": None
-    },
-    "wind_deflector_for_convertible": {
-        "autoscout24": "Windschott(für Cabrio)",
-        "mobile": None
-    },
-    "hill_start_assist": {
-        "autoscout24": "Berganfahrassistent",
-        "mobile": "Berganfahrassistent"
-    },
-    "alarm_system": {
-        "autoscout24": "Alarmanlage",
-        "mobile": "Alarmanlage"
-    },
-    "isofix": {
-        "autoscout24": "Isofix",
-        "mobile": "Isofix"
-    },
-    "isofix_passenger": {
-        "autoscout24": None,
-        "mobile": "Isofix Beifahrersitz"
-    },
-    "tire_pressure_monitoring": {
-        "autoscout24": "Reifendruckkontrollsystem",
-        "mobile": "Reifendruckkontrolle"
-    },
-    "emergency_call": {
-        "autoscout24": "Notrufsystem",
-        "mobile": "Notrufsystem"
-    },
-    "night_vision": {
-        "autoscout24": "Nachtsicht-Assistent",
-        "mobile": "Nachtsicht-Assistent"
-    },
-    "self_steering_park_assist": {
-        "autoscout24": "Einparkhilfe selbstlenkendes System",
-        "mobile": "Einparkhilfe selbstlenkendes System"
-    },
-    "power_steering": {
-        "autoscout24": "Servolenkung",
-        "mobile": "Servolenkung"
-    },
-    "central_locking": {
-        "autoscout24": "Zentralverriegelung",
-        "mobile": "Zentralverriegelung"
-    },
-    "central_locking_remote": {
-        "autoscout24": "Zentralverriegelung mit Funkfernbedienung",
-        "mobile": None
-    },
-    "electric_windows": {
-        "autoscout24": "Elektr. Fensterheber",
-        "mobile": "Elektr. Fensterheber"
-    },
-    "electric_mirrors": {
-        "autoscout24": "Elektrische Seitenspiegel",
-        "mobile": "Elektr. Seitenspiegel"
-    },
-    "electric_folding_mirrors": {
-        "autoscout24": "AuÃŸenspiegel elektr. anklappbar",
-        "mobile": "Elektr. Seitenspiegel anklappbar"
-    },
-    "auto_dimming_mirror": {
-        "autoscout24": "Innenspiegel automatisch abblendend",
-        "mobile": "Innenspiegel autom. abblendend"
-    },
-    "leather_steering_wheel": {
-        "autoscout24": "Lederlenkrad",
-        "mobile": "Lederlenkrad"
-    },
-    "heated_steering_wheel": {
-        "autoscout24": "Beheizbares Lenkrad",
-        "mobile": "Beheizbares Lenkrad"
-    },
-    "multifunction_steering_wheel": {
-        "autoscout24": "Multifunktionslenkrad",
-        "mobile": "Multifunktionslenkrad"
-    },
-    "cruise_control": {
-        "autoscout24": "Tempomat",
-        "mobile": "Tempomat"
-    },
-    "adaptive_cruise_control": {
-        "autoscout24": "Abstandstempomat",
-        "mobile": "Abstandstempomat"
-    },
-    "speed_limiter": {
-        "autoscout24": "Geschwindigkeits-begrenzungsanlage",
-        "mobile": "Geschwindigkeitsbegrenzer"
-    },
-    "start_stop_system": {
-        "autoscout24": "Start/Stop-Automatik",
-        "mobile": "Start/Stopp-Automatik"
-    },
-    "parking_sensors_front": {
-        "autoscout24": "Einparkhilfe Sensoren vorne",
-        "mobile": None
-    },
-    "parking_sensors_rear": {
-        "autoscout24": "Einparkhilfe Sensoren hinten",
-        "mobile": None
-    },
-    "parking_assist": {
-        "autoscout24": "Einparkhilfe",
-        "mobile": None
-    },
-    "park_assist_mobile": {
-        "autoscout24": None,
-        "mobile": "parkAssists"
-    },
-    "parking_camera": {
-        "autoscout24": "Einparkhilfe Kamera",
-        "mobile": None
-    },
-    "exit_assist": {
-        "autoscout24": None,
-        "mobile": "Ausparkassistent"
-    },
-    "electronic_parking_brake": {
-        "autoscout24": "Elektronische Parkbremse",
-        "mobile": None
-    },
-    "air_conditioning": {
-        "autoscout24": "Klimaanlage",
-        "mobile": None
-    },
-    "climate_control": {
-        "autoscout24": "Klimaautomatik",
-        "mobile": None
-    },
-    "climate_control_2zone": {
-        "autoscout24": "2-Zonen-Klimaautomatik",
-        "mobile": None
-    },
-    "climate_control_3zone": {
-        "autoscout24": "3-Zonen-Klimaautomatik",
-        "mobile": "3-Zonen-Klimaautomatik"
-    },
-    "climate_control_4zone": {
-        "autoscout24": "4-Zonen-Klimaautomatik",
-        "mobile": "4-Zonen-Klimaautomatik"
-    },
-    "heated_seats": {
-        "autoscout24": "Sitzheizung",
-        "mobile": "Sitzheizung"
-    },
-    "heated_rear_seats": {
-        "autoscout24": "Sitzheizung hinten",
-        "mobile": "Sitzheizung hinten"
-    },
-    "massage_seats": {
-        "autoscout24": "Massagesitze",
-        "mobile": "Massagesitze"
-    },
-    "electric_seats": {
-        "autoscout24": "Elektrische Sitze",
-        "mobile": "Elektr. Sitzeinstellung"
-    },
-    "electric_seats_memory": {
-        "autoscout24": "Elektr. Sitzeinstellung mit Memory-Funktion",
-        "mobile": "Elektr. Sitzeinstellung mit Memory-Funktion"
-    },
-    "sport_seats": {
-        "autoscout24": "Sportsitze",
-        "mobile": "Sportsitze"
-    },
-    "armrest": {
-        "autoscout24": "Armlehne",
-        "mobile": "Armlehne"
-    },
-    "foldable_passenger_seat": {
-        "autoscout24": "Umklappbarer Beifahrersitz",
-        "mobile": "Umklappbarer Beifahrersitz"
-    },
-    "auxiliary_heating": {
-        "autoscout24": "Standheizung",
-        "mobile": "Standheizung"
-    },
-    "heated_windshield": {
-        "autoscout24": "Beheizbare Frontscheibe",
-        "mobile": "Beheizbare Frontscheibe"
-    },
-    "fog_lights": {
-        "autoscout24": "Nebelscheinwerfer",
-        "mobile": "Nebelscheinwerfer"
-    },
-    "xenon_lights": {
-        "autoscout24": "Xenonscheinwerfer",
-        "mobile": "Xenonscheinwerfer"
-    },
-    "bi_xenon_lights": {
-        "autoscout24": "Bi-Xenon Scheinwerfer",
-        "mobile": "Bi-Xenon Scheinwerfer"
-    },
-    "led_headlights": {
-        "autoscout24": "LED-Scheinwerfer",
-        "mobile": "LED-Scheinwerfer"
-    },
-    "full_led_headlights": {
-        "autoscout24": "Voll-LED Scheinwerfer",
-        "mobile": None
-    },
-    "led_daytime_running_lights": {
-        "autoscout24": "LED-Tagfahrlicht",
-        "mobile": "LED-Tagfahrlicht"
-    },
-    "daytime_running_lights": {
-        "autoscout24": "Tagfahrlicht",
-        "mobile": "Tagfahrlicht"
-    },
-    "adaptive_headlights": {
-        "autoscout24": "Kurvenlicht",
-        "mobile": "Adaptives Kurvenlicht"
-    },
-    "curve_light": {
-        "autoscout24": None,
-        "mobile": "Kurvenlicht"
-    },
-    "high_beam_assist": {
-        "autoscout24": "Fernlichtassistent",
-        "mobile": "Fernlichtassistent"
-    },
-    "glare_free_high_beam": {
-        "autoscout24": "Blendfreies Fernlicht",
-        "mobile": "Blendfreies Fernlicht"
-    },
-    "laser_light": {
-        "autoscout24": "Laserlicht",
-        "mobile": "Laserlicht"
-    },
-    "light_sensor": {
-        "autoscout24": "Lichtsensor",
-        "mobile": "Lichtsensor"
-    },
-    "rain_sensor": {
-        "autoscout24": "Regensensor",
-        "mobile": "Regensensor"
-    },
-    "ambient_lighting": {
-        "autoscout24": "Ambientebeleuchtung",
-        "mobile": "Ambiente-Beleuchtung"
-    },
-    "headlight_washer": {
-        "autoscout24": "Scheinwerferreinigung",
-        "mobile": "Scheinwerferreinigung"
-    },
-    "alloy_wheels": {
-        "autoscout24": "Alufelgen",
-        "mobile": "Leichtmetallfelgen"
-    },
-    "steel_wheels": {
-        "autoscout24": "Stahlfelgen",
-        "mobile": "Stahlfelgen"
-    },
-    "sunroof": {
-        "autoscout24": "Schiebedach",
-        "mobile": "Schiebedach"
-    },
-    "panoramic_roof": {
-        "autoscout24": "Panoramadach",
-        "mobile": "Panorama-Dach"
-    },
-    "folding_roof": {
-        "autoscout24": "Faltdach",
-        "mobile": "Faltdach"
-    },
-    "roof_rack": {
-        "autoscout24": "Dachreling",
-        "mobile": "Dachreling"
-    },
-    "tinted_windows": {
-        "autoscout24": "Getönte Scheiben",
-        "mobile": "Abgedunkelte Scheiben"
-    },
-    "electric_tailgate": {
-        "autoscout24": "Elektrische Heckklappe",
-        "mobile": "Elektr. Heckklappe"
-    },
-    "air_suspension": {
-        "autoscout24": "Luftfederung",
-        "mobile": "Luftfederung"
-    },
-    "sport_suspension": {
-        "autoscout24": "Sportfahrwerk",
-        "mobile": "Sportfahrwerk"
-    },
-    "sport_package": {
-        "autoscout24": "Sportpaket",
-        "mobile": "Sportpaket"
-    },
-    "winter_package": {
-        "autoscout24": "Winterpaket",
-        "mobile": "Winterpaket"
-    },
-    "spoiler": {
-        "autoscout24": "Spoiler",
-        "mobile": "Spoiler"
-    },
-    "ski_bag": {
-        "autoscout24": "Skisack",
-        "mobile": "Skisack"
-    },
-    "tuning": {
-        "autoscout24": "Tuning",
-        "mobile": None
-    },
-    "radio": {
-        "autoscout24": "Radio",
-        "mobile": "Tuner/Radio"
-    },
-    "cd_player": {
-        "autoscout24": "CD",
-        "mobile": "CD-Spieler"
-    },
-    "multi_cd_changer": {
-        "autoscout24": "Multi-CD-Wechsler",
-        "mobile": "Multi-CD-Wechsler"
-    },
-    "mp3": {
-        "autoscout24": "MP3",
-        "mobile": None
-    },
-    "dab_radio": {
-        "autoscout24": "DAB-Radio",
-        "mobile": "Radio DAB"
-    },
-    "navigation_system": {
-        "autoscout24": "Navigationssystem",
-        "mobile": "Navigationssystem"
-    },
-    "navigation_preparation": {
-        "autoscout24": "Navigationsvorbereitung",
-        "mobile": "Navigationsvorbereitung"
-    },
-    "touchscreen": {
-        "autoscout24": "Touchscreen",
-        "mobile": "Touchscreen"
-    },
-    "voice_control": {
-        "autoscout24": "Sprachsteuerung",
-        "mobile": "Sprachsteuerung"
-    },
-    "bluetooth": {
-        "autoscout24": "Bluetooth",
-        "mobile": "Bluetooth"
-    },
-    "handsfree": {
-        "autoscout24": "Freisprecheinrichtung",
-        "mobile": "Freisprecheinrichtung"
-    },
-    "usb": {
-        "autoscout24": "USB",
-        "mobile": "USB"
-    },
-    "apple_carplay": {
-        "autoscout24": "Apple CarPlay",
-        "mobile": "Apple CarPlay"
-    },
-    "android_auto": {
-        "autoscout24": "Android Auto",
-        "mobile": "Android Auto"
-    },
-    "wifi_hotspot": {
-        "autoscout24": "W-Lan / Wifi Hotspot",
-        "mobile": "WLAN / Wifi Hotspot"
-    },
-    "music_streaming": {
-        "autoscout24": "Musikstreaming integriert",
-        "mobile": "Musikstreaming integriert"
-    },
-    "sound_system": {
-        "autoscout24": "Soundsystem",
-        "mobile": "Soundsystem"
-    },
-    "onboard_computer": {
-        "autoscout24": "Bordcomputer",
-        "mobile": "Bordcomputer"
-    },
-    "digital_cockpit": {
-        "autoscout24": "Volldigitales Kombiinstrument",
-        "mobile": "Volldigitales Kombiinstrument"
-    },
-    "tv": {
-        "autoscout24": "TV",
-        "mobile": "TV"
-    },
-    "all_season_tires": {
-        "autoscout24": "Allwetterreifen",
-        "mobile": "Allwetterreifen"
-    },
-    "summer_tires": {
-        "autoscout24": "Sommerreifen",
-        "mobile": "Sommerreifen"
-    },
-    "winter_tires": {
-        "autoscout24": "Winterreifen",
-        "mobile": "Winterreifen"
-    },
-    "spare_wheel": {
-        "autoscout24": "Reserverad",
-        "mobile": "Reserverad"
-    },
-    "emergency_wheel": {
-        "autoscout24": "Notrad",
-        "mobile": "Notrad"
-    },
-    "tire_repair_kit": {
-        "autoscout24": "Pannenkit",
-        "mobile": "Pannenkit"
-    },
-    "catalytic_converter": {
-        "autoscout24": "Katalysator",
-        "mobile": None
-    },
-    "e10_compatible": {
-        "autoscout24": "E10-geeignet",
-        "mobile": None
-    },
-    "all_wheel_drive": {
-        "autoscout24": "Allrad",
-        "mobile": "Allradantrieb"
-    },
-    "front_wheel_drive": {
-        "autoscout24": None,
-        "mobile": "Frontantrieb"
-    },
-    "rear_wheel_drive": {
-        "autoscout24": None,
-        "mobile": "Heckantrieb"
-    },
-    "warranty": {
-        "autoscout24": "Garantie",
-        "mobile": "Garantie"
-    },
-    "export": {
-        "autoscout24": None,
-        "mobile": "export"
-    },
-    "right_hand_drive": {
-        "autoscout24": "Rechtslenker",
-        "mobile": "Rechtslenker"
-    },
-    "taxi": {
-        "autoscout24": None,
-        "mobile": "Taxi"
-    },
-    "disabled_accessible": {
-        "autoscout24": "Behindertengerecht",
-        "mobile": "Behindertengerecht"
-    },
-    "smoker_package": {
-        "autoscout24": "Raucherpaket",
-        "mobile": "Raucherpaket"
-    },
-    "leather_interior": {
-        "autoscout24": "Lederausstattung",
-        "mobile": None
-    },
-    "paddle_shifters": {
-        "autoscout24": "Schaltwippen",
-        "mobile": "Schaltwippen"
-    }
-}
+KEY_MAPPING = {'vehicle_id': {'autoscout24': 'id', 'mobile': 'id', 'otomoto': 'vehicle_id'},
+               'listing_url': {'autoscout24': 'url', 'mobile': 'url', 'otomoto': 'url'},
+               'title': {'autoscout24': 'title', 'mobile': 'title', 'otomoto': 'title'},
+               'subtitle': {'autoscout24': 'vehicle_subtitle', 'mobile': None, 'otomoto': 'shortDescription'},
+               'price': {'autoscout24': 'price', 'mobile': 'price', 'otomoto': 'price'},
+               'price_info': {'autoscout24': 'price_text', 'mobile': None, 'otomoto': None},
+               'price_label': {'autoscout24': 'tracking_priceLabel', 'mobile': None, 'otomoto': None},
+               'make': {'autoscout24': 'vehicle_make', 'mobile': 'vehicle_make', 'otomoto': 'make'},
+               'model': {'autoscout24': 'vehicle_model', 'mobile': 'vehicle_model', 'otomoto': 'model'},
+               'model_version': {'autoscout24': 'vehicle_modelVersionInput', 'mobile': 'vehicle_modelVersionInput',
+                                 'otomoto': 'version_label'},
+               'model_range': {'autoscout24': None, 'mobile': 'modelRange', 'otomoto': None},
+               'trim_line': {'autoscout24': None, 'mobile': 'trimLine', 'otomoto': None},
+               'vehicle_type': {'autoscout24': 'vehicle_articleType', 'mobile': 'vc', 'otomoto': None},
+               'category': {'autoscout24': None, 'mobile': 'category', 'otomoto': None},
+               'body_type': {'autoscout24': 'bodyType', 'mobile': None, 'otomoto': 'body_type'},
+               'make_id': {'autoscout24': 'makeId', 'mobile': None, 'otomoto': None},
+               'model_id': {'autoscout24': 'modelId', 'mobile': None, 'otomoto': None},
+               'model_generation_id': {'autoscout24': 'modelGenerationId', 'mobile': None, 'otomoto': 'generation'},
+               'model_variant_id': {'autoscout24': 'modelVariantId', 'mobile': None, 'otomoto': None},
+               'motor_type_id': {'autoscout24': 'motorTypeId', 'mobile': None, 'otomoto': None},
+               'trim_line_id': {'autoscout24': 'trimLineId', 'mobile': None, 'otomoto': None},
+               'sku': {'autoscout24': None, 'mobile': 'sku', 'otomoto': None},
+               'hsn_tsn': {'autoscout24': 'hsnTsn', 'mobile': None, 'otomoto': None},
+               'identifier': {'autoscout24': 'identifier', 'mobile': None, 'otomoto': 'vin'},
+               'power_kw': {'autoscout24': 'rawPowerInKw', 'mobile': None, 'otomoto': None},
+               'power_hp': {'autoscout24': 'rawPowerInHp', 'mobile': None, 'otomoto': 'engine_power'},
+               'power_display': {'autoscout24': 'vehicle_detail_power', 'mobile': 'Power (HP)', 'otomoto': None},
+               'power_kw_display': {'autoscout24': 'powerInKw', 'mobile': None, 'otomoto': None},
+               'power_hp_display': {'autoscout24': 'powerInHp', 'mobile': None, 'otomoto': None},
+               'displacement_ccm': {'autoscout24': 'rawDisplacementInCCM', 'mobile': None,
+                                    'otomoto': 'engine_capacity'},
+               'displacement_display': {'autoscout24': 'displacementInCCM', 'mobile': 'Displacement', 'otomoto': None},
+               'cylinders': {'autoscout24': 'cylinders', 'mobile': 'cylinder', 'otomoto': None},
+               'gears': {'autoscout24': 'gears', 'mobile': None, 'otomoto': None},
+               'weight': {'autoscout24': 'weight', 'mobile': None, 'otomoto': None},
+               'net_weight': {'autoscout24': None, 'mobile': 'netWeight', 'otomoto': None},
+               'fuel_type': {'autoscout24': 'vehicle_fuel', 'mobile': 'Fuel Type', 'otomoto': 'fuel_type'},
+               'fuel_category': {'autoscout24': 'fuelCategory', 'mobile': None, 'otomoto': None},
+               'primary_fuel': {'autoscout24': 'primaryFuel', 'mobile': None, 'otomoto': None},
+               'transmission': {'autoscout24': 'vehicle_transmission', 'mobile': 'Transmission Type',
+                                'otomoto': 'gearbox'},
+               'air_conditioning_type': {'autoscout24': None, 'mobile': 'climatisation',
+                                         'otomoto': 'air_conditioning_type'},
+               'transmission_type': {'autoscout24': 'transmissionType', 'mobile': None, 'otomoto': None},
+               'drive_train': {'autoscout24': 'driveTrain', 'mobile': None, 'otomoto': None},
+               'has_particle_filter': {'autoscout24': 'hasParticleFilter', 'mobile': None, 'otomoto': None},
+               'particle_filter': {'autoscout24': None, 'mobile': 'Partikelfilter', 'otomoto': 'particle_filter'},
+               'fuel_consumption_combined': {'autoscout24': 'fuelConsumptionCombined', 'mobile': None,
+                                             'otomoto': 'combined_consumption'},
+               'fuel_consumption_urban': {'autoscout24': 'fuelConsumptionUrban', 'mobile': None,
+                                          'otomoto': 'urban_consumption'},
+               'fuel_consumption_extra_urban': {'autoscout24': 'fuelConsumptionExtraUrban', 'mobile': None,
+                                                'otomoto': 'extra_urban_consumption'},
+               'co2_emission': {'autoscout24': 'vehicle_detail_co2_emission', 'mobile': 'CO2 in g per km',
+                                'otomoto': 'co2_emissions'},
+               'co2_emission_combined': {'autoscout24': 'co2emissionInGramPerKmWithFallback', 'mobile': None,
+                                         'otomoto': None},
+               'co2_emissions_combined_fallback': {'autoscout24': 'co2EmissionsCombinedWithFallback', 'mobile': None,
+                                                   'otomoto': None},
+               'co2_emissions_combined_weighted': {'autoscout24': 'co2EmissionsCombinedWeightedWithFallback',
+                                                   'mobile': None, 'otomoto': None},
+               'co2_emissions_discharged': {'autoscout24': 'co2EmissionsDischarged', 'mobile': None, 'otomoto': None},
+               'co2_class': {'autoscout24': 'co2ClassWithFallback', 'mobile': 'EU CO2 Class', 'otomoto': None},
+               'co2_class_discharged': {'autoscout24': 'co2ClassDischarged', 'mobile': None, 'otomoto': None},
+               'emission_sticker': {'autoscout24': None, 'mobile': 'emissionsSticker', 'otomoto': None},
+               'emission_standard': {'autoscout24': None, 'mobile': 'attr_emc', 'otomoto': None},
+               'consumption_combined': {'autoscout24': 'consumptionCombinedWithFallback', 'mobile': None,
+                                        'otomoto': None},
+               'consumption_combined_weighted': {'autoscout24': 'consumptionCombinedWeightedWithFallback',
+                                                 'mobile': None, 'otomoto': None},
+               'consumption_combined_discharged': {'autoscout24': 'consumptionCombinedDischarged', 'mobile': None,
+                                                   'otomoto': None},
+               'consumption_electric_combined': {'autoscout24': 'consumptionElectricCombinedWithFallback',
+                                                 'mobile': None, 'otomoto': None},
+               'consumption_electric_combined_weighted': {
+                   'autoscout24': 'consumptionElectricCombinedWeightedWithFallback', 'mobile': None, 'otomoto': None},
+               'consumption_city': {'autoscout24': 'consumptionCity', 'mobile': None, 'otomoto': None},
+               'consumption_city_discharged': {'autoscout24': 'consumptionCityDischarged', 'mobile': None,
+                                               'otomoto': None},
+               'consumption_suburban': {'autoscout24': 'consumptionSuburban', 'mobile': None, 'otomoto': None},
+               'consumption_suburban_discharged': {'autoscout24': 'consumptionSuburbanDischarged', 'mobile': None,
+                                                   'otomoto': None},
+               'consumption_rural': {'autoscout24': 'consumptionRural', 'mobile': None, 'otomoto': None},
+               'consumption_rural_discharged': {'autoscout24': 'consumptionRuralDischarged', 'mobile': None,
+                                                'otomoto': None},
+               'consumption_highway': {'autoscout24': 'consumptionHighway', 'mobile': None, 'otomoto': None},
+               'consumption_highway_discharged': {'autoscout24': 'consumptionHighwayDischarged', 'mobile': None,
+                                                  'otomoto': None},
+               'consumption_electric_city': {'autoscout24': 'consumptionElectricCity', 'mobile': None, 'otomoto': None},
+               'consumption_electric_suburban': {'autoscout24': 'consumptionElectricSuburban', 'mobile': None,
+                                                 'otomoto': None},
+               'consumption_electric_rural': {'autoscout24': 'consumptionElectricRural', 'mobile': None,
+                                              'otomoto': None},
+               'consumption_electric_highway': {'autoscout24': 'consumptionElectricHighway', 'mobile': None,
+                                                'otomoto': None},
+               'environment_pkw_envkv': {'autoscout24': 'environmentPkwEnVKV', 'mobile': None, 'otomoto': None},
+               'environment_eu_directive': {'autoscout24': 'environmentEuDirective', 'mobile': None, 'otomoto': None},
+               'environment_bimschv35': {'autoscout24': 'environmentBImSchV35', 'mobile': None, 'otomoto': None},
+               'wltp': {'autoscout24': 'wltp', 'mobile': None, 'otomoto': None},
+               'energy_consumption': {'autoscout24': None, 'mobile': 'envkv.energyConsumption', 'otomoto': None},
+               'consumption_costs': {'autoscout24': 'consumptionCosts', 'mobile': 'envkv.consumptionCosts',
+                                     'otomoto': None},
+               'consumption_costs_year': {'autoscout24': 'consumptionCostsYear', 'mobile': None, 'otomoto': None},
+               'fuel_price': {'autoscout24': 'fuelPrice', 'mobile': 'envkv.fuel.price', 'otomoto': None},
+               'co2_costs': {'autoscout24': None, 'mobile': 'envkv.co2Costs', 'otomoto': None},
+               'co2_costs_average': {'autoscout24': 'co2CostsAverage', 'mobile': None, 'otomoto': None},
+               'co2_costs_high': {'autoscout24': 'co2CostsHigh', 'mobile': None, 'otomoto': None},
+               'co2_costs_low': {'autoscout24': 'co2CostsLow', 'mobile': None, 'otomoto': None},
+               'vehicle_tax': {'autoscout24': 'vehicleTax', 'mobile': 'envkv.tax', 'otomoto': None},
+               'engine_type': {'autoscout24': None, 'mobile': 'envkv.engineType', 'otomoto': None},
+               'other_energy_source': {'autoscout24': None, 'mobile': 'envkv.otherEnergySource', 'otomoto': None},
+               'mileage_km': {'autoscout24': 'mileageInKmRaw', 'mobile': None, 'otomoto': 'mileage'},
+               'mileage_display': {'autoscout24': 'vehicle_mileageInKm', 'mobile': 'Milage', 'otomoto': None},
+               'mileage_detail': {'autoscout24': 'vehicle_detail_mileage', 'mobile': None, 'otomoto': None},
+               'mileage_in_km': {'autoscout24': 'mileageInKm', 'mobile': None, 'otomoto': None},
+               'first_registration': {'autoscout24': 'vehicle_detail_first_registration',
+                                      'mobile': 'First Registration', 'otomoto': 'date_registration'},
+               'first_registration_raw': {'autoscout24': 'firstRegistrationDateRaw', 'mobile': None, 'otomoto': None},
+               'first_registration_date': {'autoscout24': 'firstRegistrationDate', 'mobile': None, 'otomoto': None},
+               'production_year': {'autoscout24': 'productionYear', 'mobile': None, 'otomoto': 'year'},
+               'construction_year': {'autoscout24': None, 'mobile': 'constructionYear', 'otomoto': None},
+               'last_inspection': {'autoscout24': None, 'mobile': 'Last inspection', 'otomoto': None},
+               'next_inspection': {'autoscout24': 'nextVehicleSafetyInspection', 'mobile': None, 'otomoto': None},
+               'new_inspection': {'autoscout24': 'newInspection', 'mobile': 'Inspektion neu', 'otomoto': None},
+               'last_service_date': {'autoscout24': 'lastTechnicalServiceDate', 'mobile': 'lastMaintenanceDate',
+                                     'otomoto': None},
+               'last_service_mileage': {'autoscout24': None, 'mobile': 'lastMaintenanceMileage', 'otomoto': None},
+               'last_belt_service': {'autoscout24': 'lastBeltServiceDate', 'mobile': None, 'otomoto': None},
+               'full_service_history': {'autoscout24': 'hasFullServiceHistory', 'mobile': None,
+                                        'otomoto': 'service_record'},
+               'service_book_maintained': {'autoscout24': None, 'mobile': 'Scheckheftgepflegt', 'otomoto': None},
+               'offer_type': {'autoscout24': 'vehicle_offerType', 'mobile': None, 'otomoto': None},
+               'condition': {'autoscout24': None, 'mobile': 'damageCondition', 'otomoto': 'new_used'},
+               'damage_condition': {'autoscout24': None, 'mobile': 'attr_subc', 'otomoto': 'damaged'},
+               'had_accident': {'autoscout24': 'hadAccident', 'mobile': None, 'otomoto': 'no_accident'},
+               'previous_owners': {'autoscout24': 'noOfPreviousOwners', 'mobile': 'attr_pvo',
+                                   'otomoto': 'original_owner'},
+               'is_rental': {'autoscout24': 'isRental', 'mobile': None, 'otomoto': None},
+               'non_smoking': {'autoscout24': 'nonSmoking', 'mobile': None, 'otomoto': None},
+               'non_smoking_vehicle': {'autoscout24': None, 'mobile': 'Nichtraucher-Fahrzeug', 'otomoto': None},
+               'has_registration': {'autoscout24': 'hasCarRegistration', 'mobile': None, 'otomoto': 'registered'},
+               'new_driver_suitable': {'autoscout24': 'newDriverSuitable', 'mobile': None, 'otomoto': None},
+               'country_version': {'autoscout24': None, 'mobile': 'Country version', 'otomoto': 'country_origin'},
+               'original_market': {'autoscout24': 'originalMarket', 'mobile': None, 'otomoto': None},
+               'type': {'autoscout24': 'type', 'mobile': None, 'otomoto': None},
+               'seats': {'autoscout24': 'numberOfSeats', 'mobile': '# of Seats', 'otomoto': 'nr_seats'},
+               'doors': {'autoscout24': 'numberOfDoors', 'mobile': '# of doors', 'otomoto': 'door_count'},
+               'color': {'autoscout24': 'bodyColor', 'mobile': 'Exterior Color', 'otomoto': 'color'},
+               'color_original': {'autoscout24': 'bodyColorOriginal', 'mobile': None, 'otomoto': None},
+               'manufacturer_color': {'autoscout24': None, 'mobile': 'manufacturerColorName', 'otomoto': None},
+               'paint_type': {'autoscout24': 'paintType', 'mobile': None, 'otomoto': 'colour_type'},
+               'upholstery': {'autoscout24': 'upholstery', 'mobile': None, 'otomoto': 'upholstery_type'},
+               'upholstery_color': {'autoscout24': 'upholsteryColor', 'mobile': None, 'otomoto': None},
+               'interior': {'autoscout24': None, 'mobile': 'interior', 'otomoto': None},
+               'interior_color': {'autoscout24': None, 'mobile': 'interior_color', 'otomoto': None},
+               'interior_type': {'autoscout24': None, 'mobile': 'interior_type', 'otomoto': None},
+               'vehicle_model_id': {'autoscout24': 'vehicle_modelId', 'mobile': None, 'otomoto': None},
+               'vehicle_transmission': {'autoscout24': 'vehicle_detail_transmission', 'mobile': None, 'otomoto': None},
+               'vehicle_fuel_type': {'autoscout24': 'vehicle_detail_fuel', 'mobile': None, 'otomoto': None},
+               'vehicle_fuel_consumption': {'autoscout24': 'vehicle_detail_fuel_consumption', 'mobile': None,
+                                            'otomoto': None},
+               'model_or_line_id': {'autoscout24': 'modelOrModelLineId', 'mobile': None, 'otomoto': None},
+               'wheel_base': {'autoscout24': 'wheelBase', 'mobile': None, 'otomoto': None},
+               'total_height': {'autoscout24': 'totalHeight', 'mobile': None, 'otomoto': None},
+               'total_width': {'autoscout24': 'totalWidth', 'mobile': None, 'otomoto': None},
+               'total_length': {'autoscout24': 'totalLength', 'mobile': None, 'otomoto': None},
+               'gross_vehicle_weight': {'autoscout24': 'grossVehicleWeight', 'mobile': None, 'otomoto': None},
+               'gross_vehicle_weight_detail': {'autoscout24': 'vehicle_detail_zul._gesamtgewicht', 'mobile': None,
+                                               'otomoto': None},
+               'payload': {'autoscout24': 'payload', 'mobile': None, 'otomoto': None},
+               'load_width': {'autoscout24': 'loadWidth', 'mobile': None, 'otomoto': None},
+               'load_height': {'autoscout24': 'loadHeight', 'mobile': None, 'otomoto': None},
+               'load_length': {'autoscout24': 'loadLength', 'mobile': None, 'otomoto': None},
+               'load_volume': {'autoscout24': 'loadVolume', 'mobile': None, 'otomoto': None},
+               'trailer_load_braked': {'autoscout24': None, 'mobile': 'trailerLoadBraked', 'otomoto': None},
+               'trailer_load_unbraked': {'autoscout24': None, 'mobile': 'trailerLoadUnbraked', 'otomoto': None},
+               'max_towing_weight': {'autoscout24': 'maximumTowingWeight', 'mobile': None, 'otomoto': None},
+               'max_nose_weight': {'autoscout24': None, 'mobile': 'maxNoseWeight', 'otomoto': None},
+               'fuel_tank_volume': {'autoscout24': None, 'mobile': 'fuelTankVolume', 'otomoto': None},
+               'battery_ownership': {'autoscout24': 'batteryOwnershipType', 'mobile': None,
+                                     'otomoto': 'battery_ownership_model'},
+               'battery_charging_time': {'autoscout24': 'batteryChargingTime', 'mobile': None, 'otomoto': None},
+               'battery_capacity': {'autoscout24': None, 'mobile': 'batteryCapacity', 'otomoto': 'battery_capacity'},
+               'battery_certificate': {'autoscout24': 'Batteriezertifikat', 'mobile': 'Batteriezertifikat',
+                                       'otomoto': None},
+               'battery': {'autoscout24': None, 'mobile': 'battery', 'otomoto': None},
+               'electric_range': {'autoscout24': 'electricRangeWithFallback', 'mobile': None, 'otomoto': 'autonomy'},
+               'electric_range_city': {'autoscout24': 'electricRangeCity', 'mobile': None, 'otomoto': None},
+               'number_of_beds': {'autoscout24': 'numberOfBeds', 'mobile': None, 'otomoto': None},
+               'number_of_axles': {'autoscout24': 'numberOfAxles', 'mobile': None, 'otomoto': None},
+               'vehicle_art': {'autoscout24': 'vehicle_detail_fahrzeugart', 'mobile': 'vehicle_detail_fahrzeugart',
+                               'otomoto': None},
+               'double_cab': {'autoscout24': 'Doppelkabine', 'mobile': 'Doppelkabine', 'otomoto': None},
+               'awning': {'autoscout24': 'Markise', 'mobile': 'Markise', 'otomoto': None},
+               'sliding_door_type': {'autoscout24': None, 'mobile': 'slidingDoor', 'otomoto': None},
+               'sliding_door': {'autoscout24': 'Schiebetür', 'mobile': None, 'otomoto': None},
+               'sliding_door_right': {'autoscout24': 'Schiebetür rechts', 'mobile': None, 'otomoto': None},
+               'sliding_door_left': {'autoscout24': 'Schiebetür links', 'mobile': None, 'otomoto': None},
+               'country_code': {'autoscout24': 'location_countryCode', 'mobile': 'Country Code', 'otomoto': None},
+               'postal_code': {'autoscout24': 'location_zip', 'mobile': 'Postal Code', 'otomoto': None},
+               'city': {'autoscout24': 'location_city', 'mobile': 'City', 'otomoto': None},
+               'street': {'autoscout24': 'location_street', 'mobile': None, 'otomoto': None},
+               'seller_name': {'autoscout24': 'seller_name', 'mobile': 'seller_name', 'otomoto': 'seller_name'},
+               'license_plate': {'autoscout24': 'licensePlate', 'mobile': None, 'otomoto': None},
+               'images': {'autoscout24': 'images', 'mobile': 'images', 'otomoto': 'images'},
+               'description': {'autoscout24': 'description', 'mobile': 'description', 'otomoto': 'description'},
+               'carpass_mileage_url': {'autoscout24': 'carpassMileageUrl', 'mobile': None, 'otomoto': None},
+               'tracking_first_registration': {'autoscout24': 'tracking_firstRegistration', 'mobile': None,
+                                               'otomoto': None},
+               'tracking_fuel_type': {'autoscout24': 'tracking_fuelType', 'mobile': None, 'otomoto': None},
+               'tracking_image_content': {'autoscout24': 'tracking_imageContent', 'mobile': None, 'otomoto': None},
+               'tracking_smyle_eligible': {'autoscout24': 'tracking_isSmyleEligible', 'mobile': None, 'otomoto': None},
+               'tracking_mileage': {'autoscout24': 'tracking_mileage', 'mobile': None, 'otomoto': None},
+               'tracking_price': {'autoscout24': 'tracking_price', 'mobile': None, 'otomoto': None},
+               'tracking_model_taxonomy': {'autoscout24': 'tracking_modelTaxonomy', 'mobile': None, 'otomoto': None},
+               'tracking_boosting_product': {'autoscout24': 'tracking_boosting_product', 'mobile': None,
+                                             'otomoto': None},
+               'tracking_relevance_adjustment': {'autoscout24': 'tracking_relevance_adjustment', 'mobile': None,
+                                                 'otomoto': None},
+               'tracking_boost_level': {'autoscout24': 'tracking_boost_level', 'mobile': None, 'otomoto': None},
+               'tracking_applied_boost_level': {'autoscout24': 'tracking_applied_boost_level', 'mobile': None,
+                                                'otomoto': None},
+               'tracking_order_bucket': {'autoscout24': 'tracking_orderBucket', 'mobile': None, 'otomoto': None},
+               'tracking_topspot_algorithm': {'autoscout24': 'tracking_topspot_algorithm', 'mobile': None,
+                                              'otomoto': None},
+               'tracking_topspot_dealer_id': {'autoscout24': 'tracking_topspot_dealer_id', 'mobile': None,
+                                              'otomoto': None},
+               'attr_c': {'autoscout24': None, 'mobile': 'attr_c', 'otomoto': None},
+               'attr_con': {'autoscout24': None, 'mobile': 'attr_con', 'otomoto': None},
+               'attr_nw': {'autoscout24': None, 'mobile': 'attr_nw', 'otomoto': None},
+               'attr_bc': {'autoscout24': None, 'mobile': 'attr_bc', 'otomoto': None},
+               'attr_yc': {'autoscout24': None, 'mobile': 'attr_yc', 'otomoto': None},
+               'abs': {'autoscout24': 'ABS', 'mobile': 'ABS', 'otomoto': 'antilock_brake_system'},
+               'esp': {'autoscout24': 'ESP', 'mobile': 'ESP', 'otomoto': 'esp'},
+               'traction_control': {'autoscout24': 'Traktionskontrolle', 'mobile': 'Traktionskontrolle',
+                                    'otomoto': 'traction_control'},
+               'driver_airbag': {'autoscout24': 'Fahrerairbag', 'mobile': None, 'otomoto': 'driver_airbag'},
+               'passenger_airbag': {'autoscout24': 'Beifahrerairbag', 'mobile': None, 'otomoto': 'passenger_airbag'},
+               'side_airbag': {'autoscout24': 'Seitenairbag', 'mobile': None,
+                               'otomoto': 'side_airbag_driver_and_passenger'},
+               'head_airbag': {'autoscout24': 'Kopfairbag', 'mobile': None, 'otomoto': 'head_airbags_front'},
+               'rear_airbag': {'autoscout24': 'Airbag hinten', 'mobile': None, 'otomoto': 'side_airbags_rear'},
+               'airbag': {'autoscout24': None, 'mobile': 'airbag', 'otomoto': None},
+               'immobilizer': {'autoscout24': 'Wegfahrsperre', 'mobile': 'Elektr. Wegfahrsperre', 'otomoto': None},
+               'emergency_brake_assist': {'autoscout24': 'Notbremsassistent', 'mobile': 'Notbremsassistent',
+                                          'otomoto': 'brake_assist'},
+               'blind_spot_assist': {'autoscout24': 'Totwinkel-Assistent', 'mobile': 'Totwinkel-Assistent',
+                                     'otomoto': 'blind_spot_warning'},
+               'lane_assist': {'autoscout24': 'Spurhalteassistent', 'mobile': 'Spurhalteassistent',
+                               'otomoto': 'lane_control_assistant'},
+               'distance_warning': {'autoscout24': 'Abstandswarner', 'mobile': 'Abstandswarner',
+                                    'otomoto': 'distance_control'},
+               'traffic_sign_recognition': {'autoscout24': 'Verkehrszeichenerkennung',
+                                            'mobile': 'Verkehrszeichenerkennung',
+                                            'otomoto': 'active_speed_sign_recognition'},
+               'luggage_partition': {'autoscout24': 'Gepäckraumabtrennung', 'mobile': None, 'otomoto': None},
+               'folding_rear_seat': {'autoscout24': 'teilb. Rücksitzbank', 'mobile': None, 'otomoto': None},
+               'lumbar_support': {'autoscout24': 'Lordosenstütze', 'mobile': None,
+                                  'otomoto': 'lumbar_adjust_driver_electric'},
+               'tow_bar': {'autoscout24': 'Anhängerkupplung', 'mobile': None, 'otomoto': 'towbar'},
+               'wireless_phone_charging': {'autoscout24': 'Induktionsladen für Smartphones', 'mobile': None,
+                                           'otomoto': 'wireless_device_charging'},
+               'keyless_central_locking': {'autoscout24': 'Schlüssellose Zentralverriegelung', 'mobile': None,
+                                           'otomoto': None},
+               'seat_ventilation': {'autoscout24': 'Sitzbelüftung', 'mobile': None, 'otomoto': 'ventilated_front_seat'},
+               'vehicle_co2_class': {'autoscout24': 'vehicle_detail_co₂-klasse', 'mobile': None, 'otomoto': None},
+               'wind_deflector_for_convertible': {'autoscout24': 'Windschott(für Cabrio)', 'mobile': None,
+                                                  'otomoto': None},
+               'hill_start_assist': {'autoscout24': 'Berganfahrassistent', 'mobile': 'Berganfahrassistent',
+                                     'otomoto': 'hill_holder'},
+               'alarm_system': {'autoscout24': 'Alarmanlage', 'mobile': 'Alarmanlage', 'otomoto': None},
+               'isofix': {'autoscout24': 'Isofix', 'mobile': 'Isofix', 'otomoto': 'child_seat_fixation'},
+               'isofix_passenger': {'autoscout24': None, 'mobile': 'Isofix Beifahrersitz', 'otomoto': None},
+               'tire_pressure_monitoring': {'autoscout24': 'Reifendruckkontrollsystem',
+                                            'mobile': 'Reifendruckkontrolle', 'otomoto': 'tyre_pressure_control'},
+               'emergency_call': {'autoscout24': 'Notrufsystem', 'mobile': 'Notrufsystem',
+                                  'otomoto': 'automatic_emergency_call'},
+               'night_vision': {'autoscout24': 'Nachtsicht-Assistent', 'mobile': 'Nachtsicht-Assistent',
+                                'otomoto': None},
+               'self_steering_park_assist': {'autoscout24': 'Einparkhilfe selbstlenkendes System',
+                                             'mobile': 'Einparkhilfe selbstlenkendes System',
+                                             'otomoto': 'autonomous_parking_system'},
+               'power_steering': {'autoscout24': 'Servolenkung', 'mobile': 'Servolenkung', 'otomoto': 'power_steering'},
+               'central_locking': {'autoscout24': 'Zentralverriegelung', 'mobile': 'Zentralverriegelung',
+                                   'otomoto': None},
+               'central_locking_remote': {'autoscout24': 'Zentralverriegelung mit Funkfernbedienung', 'mobile': None,
+                                          'otomoto': None},
+               'electric_windows': {'autoscout24': 'Elektr. Fensterheber', 'mobile': 'Elektr. Fensterheber',
+                                    'otomoto': None},
+               'electric_mirrors': {'autoscout24': 'Elektrische Seitenspiegel', 'mobile': 'Elektr. Seitenspiegel',
+                                    'otomoto': None},
+               'electric_folding_mirrors': {'autoscout24': 'AuÃŸenspiegel elektr. anklappbar',
+                                            'mobile': 'Elektr. Seitenspiegel anklappbar',
+                                            'otomoto': 'door_mirrors_electrically_foldable'},
+               'auto_dimming_mirror': {'autoscout24': 'Innenspiegel automatisch abblendend',
+                                       'mobile': 'Innenspiegel autom. abblendend', 'otomoto': None},
+               'leather_steering_wheel': {'autoscout24': 'Lederlenkrad', 'mobile': 'Lederlenkrad',
+                                          'otomoto': 'leather_steering_wheel'},
+               'heated_steering_wheel': {'autoscout24': 'Beheizbares Lenkrad', 'mobile': 'Beheizbares Lenkrad',
+                                         'otomoto': 'steering_wheel_heated'},
+               'multifunction_steering_wheel': {'autoscout24': 'Multifunktionslenkrad',
+                                                'mobile': 'Multifunktionslenkrad',
+                                                'otomoto': 'steering_wheel_with_radio_operation'},
+               'cruise_control': {'autoscout24': 'Tempomat', 'mobile': 'Tempomat', 'otomoto': None},
+               'cruisecontrol_type': {'autoscout24': None, 'mobile': None, 'otomoto': 'cruisecontrol_type'},
+               'adaptive_cruise_control': {'autoscout24': 'Abstandstempomat', 'mobile': 'Abstandstempomat',
+                                           'otomoto': None},
+               'speed_limiter': {'autoscout24': 'Geschwindigkeits-begrenzungsanlage',
+                                 'mobile': 'Geschwindigkeitsbegrenzer', 'otomoto': 'speed_limiter'},
+               'start_stop_system': {'autoscout24': 'Start/Stop-Automatik', 'mobile': 'Start/Stopp-Automatik',
+                                     'otomoto': 'startstop_system'},
+               'parking_sensors_front': {'autoscout24': 'Einparkhilfe Sensoren vorne', 'mobile': None,
+                                         'otomoto': 'park_distance_control_front'},
+               'parking_sensors_rear': {'autoscout24': 'Einparkhilfe Sensoren hinten', 'mobile': None,
+                                        'otomoto': 'park_distance_control_rear'},
+               'parking_assist': {'autoscout24': 'Einparkhilfe', 'mobile': None, 'otomoto': 'park_assistant'},
+               'park_assist_mobile': {'autoscout24': None, 'mobile': 'parkAssists', 'otomoto': None},
+               'parking_camera': {'autoscout24': 'Einparkhilfe Kamera', 'mobile': None, 'otomoto': '360_view_camera'},
+               'exit_assist': {'autoscout24': None, 'mobile': 'Ausparkassistent', 'otomoto': None},
+               'electronic_parking_brake': {'autoscout24': 'Elektronische Parkbremse', 'mobile': None,
+                                            'otomoto': 'electric_parking_brake'},
+               'air_conditioning': {'autoscout24': 'Klimaanlage', 'mobile': None, 'otomoto': None},
+               'climate_control': {'autoscout24': 'Klimaautomatik', 'mobile': None,
+                                   'otomoto': 'automatic_heating_control'},
+               'climate_control_2zone': {'autoscout24': '2-Zonen-Klimaautomatik', 'mobile': None, 'otomoto': None},
+               'climate_control_3zone': {'autoscout24': '3-Zonen-Klimaautomatik', 'mobile': '3-Zonen-Klimaautomatik',
+                                         'otomoto': None},
+               'climate_control_4zone': {'autoscout24': '4-Zonen-Klimaautomatik', 'mobile': '4-Zonen-Klimaautomatik',
+                                         'otomoto': None},
+               'heated_seats': {'autoscout24': 'Sitzheizung', 'mobile': 'Sitzheizung', 'otomoto': 'heated_seat_driver'},
+               'heated_rear_seats': {'autoscout24': 'Sitzheizung hinten', 'mobile': 'Sitzheizung hinten',
+                                     'otomoto': 'rear_seat_heating'},
+               'massage_seats': {'autoscout24': 'Massagesitze', 'mobile': 'Massagesitze', 'otomoto': None},
+               'electric_seats': {'autoscout24': 'Elektrische Sitze', 'mobile': 'Elektr. Sitzeinstellung',
+                                  'otomoto': 'driver_seat_electrically_adjustable'},
+               'electric_seats_memory': {'autoscout24': 'Elektr. Sitzeinstellung mit Memory-Funktion',
+                                         'mobile': 'Elektr. Sitzeinstellung mit Memory-Funktion',
+                                         'otomoto': 'memory_seat'},
+               'sport_seats': {'autoscout24': 'Sportsitze', 'mobile': 'Sportsitze', 'otomoto': 'sport_seats_front'},
+               'armrest': {'autoscout24': 'Armlehne', 'mobile': 'Armlehne', 'otomoto': 'armrest_rear'},
+               'foldable_passenger_seat': {'autoscout24': 'Umklappbarer Beifahrersitz',
+                                           'mobile': 'Umklappbarer Beifahrersitz', 'otomoto': None},
+               'auxiliary_heating': {'autoscout24': 'Standheizung', 'mobile': 'Standheizung',
+                                     'otomoto': 'independent_vehicle_heater'},
+               'heated_windshield': {'autoscout24': 'Beheizbare Frontscheibe', 'mobile': 'Beheizbare Frontscheibe',
+                                     'otomoto': 'windscreen_heating'},
+               'fog_lights': {'autoscout24': 'Nebelscheinwerfer', 'mobile': 'Nebelscheinwerfer',
+                              'otomoto': 'led_fog_lamps'},
+               'xenon_lights': {'autoscout24': 'Xenonscheinwerfer', 'mobile': 'Xenonscheinwerfer', 'otomoto': None},
+               'bi_xenon_lights': {'autoscout24': 'Bi-Xenon Scheinwerfer', 'mobile': 'Bi-Xenon Scheinwerfer',
+                                   'otomoto': None},
+               'led_headlights': {'autoscout24': 'LED-Scheinwerfer', 'mobile': 'LED-Scheinwerfer', 'otomoto': None},
+               'full_led_headlights': {'autoscout24': 'Voll-LED Scheinwerfer', 'mobile': None, 'otomoto': None},
+               'led_daytime_running_lights': {'autoscout24': 'LED-Tagfahrlicht', 'mobile': 'LED-Tagfahrlicht',
+                                              'otomoto': 'led_daytime_running_lights'},
+               'daytime_running_lights': {'autoscout24': 'Tagfahrlicht', 'mobile': 'Tagfahrlicht',
+                                          'otomoto': 'daytime_running_lights'},
+               'adaptive_headlights': {'autoscout24': 'Kurvenlicht', 'mobile': 'Adaptives Kurvenlicht',
+                                       'otomoto': 'adaptive_light'},
+               'curve_light': {'autoscout24': None, 'mobile': 'Kurvenlicht', 'otomoto': 'cornering_headlights'},
+               'high_beam_assist': {'autoscout24': 'Fernlichtassistent', 'mobile': 'Fernlichtassistent',
+                                    'otomoto': 'automated_high_beam_assist'},
+               'glare_free_high_beam': {'autoscout24': 'Blendfreies Fernlicht', 'mobile': 'Blendfreies Fernlicht',
+                                        'otomoto': None},
+               'laser_light': {'autoscout24': 'Laserlicht', 'mobile': 'Laserlicht', 'otomoto': None},
+               'light_sensor': {'autoscout24': 'Lichtsensor', 'mobile': 'Lichtsensor', 'otomoto': None},
+               'rain_sensor': {'autoscout24': 'Regensensor', 'mobile': 'Regensensor', 'otomoto': 'rain_sensor'},
+               'ambient_lighting': {'autoscout24': 'Ambientebeleuchtung', 'mobile': 'Ambiente-Beleuchtung',
+                                    'otomoto': 'led_interior_lighting'},
+               'headlight_washer': {'autoscout24': 'Scheinwerferreinigung', 'mobile': 'Scheinwerferreinigung',
+                                    'otomoto': 'headlamp_wash'},
+               'alloy_wheels': {'autoscout24': 'Alufelgen', 'mobile': 'Leichtmetallfelgen', 'otomoto': None},
+               'alloy_wheels_type': {'autoscout24': None, 'mobile': None, 'otomoto': 'alloy_wheels_type'},
+               'steel_wheels': {'autoscout24': 'Stahlfelgen', 'mobile': 'Stahlfelgen', 'otomoto': None},
+               'sunroof': {'autoscout24': 'Schiebedach', 'mobile': 'Schiebedach', 'otomoto': None},
+               'sunroof_type': {'autoscout24': None, 'mobile': None, 'otomoto': 'sunroof'},
+               'panoramic_roof': {'autoscout24': 'Panoramadach', 'mobile': 'Panorama-Dach', 'otomoto': None},
+               'folding_roof': {'autoscout24': 'Faltdach', 'mobile': 'Faltdach', 'otomoto': None},
+               'roof_rack': {'autoscout24': 'Dachreling', 'mobile': 'Dachreling', 'otomoto': None},
+               'tinted_windows': {'autoscout24': 'Getönte Scheiben', 'mobile': 'Abgedunkelte Scheiben',
+                                  'otomoto': 'tinted_rear_windows'},
+               'electric_tailgate': {'autoscout24': 'Elektrische Heckklappe', 'mobile': 'Elektr. Heckklappe',
+                                     'otomoto': None},
+               'air_suspension': {'autoscout24': 'Luftfederung', 'mobile': 'Luftfederung', 'otomoto': 'air_suspension'},
+               'sport_suspension': {'autoscout24': 'Sportfahrwerk', 'mobile': 'Sportfahrwerk',
+                                    'otomoto': 'sport_suspension'},
+               'sport_package': {'autoscout24': 'Sportpaket', 'mobile': 'Sportpaket', 'otomoto': None},
+               'winter_package': {'autoscout24': 'Winterpaket', 'mobile': 'Winterpaket', 'otomoto': None},
+               'spoiler': {'autoscout24': 'Spoiler', 'mobile': 'Spoiler', 'otomoto': None},
+               'ski_bag': {'autoscout24': 'Skisack', 'mobile': 'Skisack', 'otomoto': None},
+               'tuning': {'autoscout24': 'Tuning', 'mobile': None, 'otomoto': 'tuning'},
+               'radio': {'autoscout24': 'Radio', 'mobile': 'Tuner/Radio', 'otomoto': 'radio'},
+               'cd_player': {'autoscout24': 'CD', 'mobile': 'CD-Spieler', 'otomoto': None},
+               'multi_cd_changer': {'autoscout24': 'Multi-CD-Wechsler', 'mobile': 'Multi-CD-Wechsler', 'otomoto': None},
+               'mp3': {'autoscout24': 'MP3', 'mobile': None, 'otomoto': None},
+               'dab_radio': {'autoscout24': 'DAB-Radio', 'mobile': 'Radio DAB', 'otomoto': None},
+               'navigation_system': {'autoscout24': 'Navigationssystem', 'mobile': 'Navigationssystem',
+                                     'otomoto': 'navigation_system'},
+               'navigation_preparation': {'autoscout24': 'Navigationsvorbereitung', 'mobile': 'Navigationsvorbereitung',
+                                          'otomoto': None},
+               'touchscreen': {'autoscout24': 'Touchscreen', 'mobile': 'Touchscreen', 'otomoto': 'touchscreen_monitor'},
+               'voice_control': {'autoscout24': 'Sprachsteuerung', 'mobile': 'Sprachsteuerung',
+                                 'otomoto': 'voice_control_for_vehicle_functions'},
+               'bluetooth': {'autoscout24': 'Bluetooth', 'mobile': 'Bluetooth', 'otomoto': 'bluetooth_interface'},
+               'handsfree': {'autoscout24': 'Freisprecheinrichtung', 'mobile': 'Freisprecheinrichtung',
+                             'otomoto': 'hands_free_system'},
+               'usb': {'autoscout24': 'USB', 'mobile': 'USB', 'otomoto': 'usb_in'},
+               'apple_carplay': {'autoscout24': 'Apple CarPlay', 'mobile': 'Apple CarPlay', 'otomoto': 'apple_carplay'},
+               'android_auto': {'autoscout24': 'Android Auto', 'mobile': 'Android Auto', 'otomoto': 'android_auto'},
+               'wifi_hotspot': {'autoscout24': 'W-Lan / Wifi Hotspot', 'mobile': 'WLAN / Wifi Hotspot',
+                                'otomoto': 'internet_access'},
+               'music_streaming': {'autoscout24': 'Musikstreaming integriert', 'mobile': 'Musikstreaming integriert',
+                                   'otomoto': None},
+               'sound_system': {'autoscout24': 'Soundsystem', 'mobile': 'Soundsystem', 'otomoto': 'soundsystem'},
+               'onboard_computer': {'autoscout24': 'Bordcomputer', 'mobile': 'Bordcomputer', 'otomoto': None},
+               'digital_cockpit': {'autoscout24': 'Volldigitales Kombiinstrument',
+                                   'mobile': 'Volldigitales Kombiinstrument', 'otomoto': 'head_up_display'},
+               'tv': {'autoscout24': 'TV', 'mobile': 'TV', 'otomoto': None},
+               'all_season_tires': {'autoscout24': 'Allwetterreifen', 'mobile': 'Allwetterreifen', 'otomoto': None},
+               'summer_tires': {'autoscout24': 'Sommerreifen', 'mobile': 'Sommerreifen', 'otomoto': None},
+               'winter_tires': {'autoscout24': 'Winterreifen', 'mobile': 'Winterreifen', 'otomoto': None},
+               'spare_wheel': {'autoscout24': 'Reserverad', 'mobile': 'Reserverad', 'otomoto': None},
+               'emergency_wheel': {'autoscout24': 'Notrad', 'mobile': 'Notrad', 'otomoto': None},
+               'tire_repair_kit': {'autoscout24': 'Pannenkit', 'mobile': 'Pannenkit', 'otomoto': None},
+               'catalytic_converter': {'autoscout24': 'Katalysator', 'mobile': None, 'otomoto': None},
+               'e10_compatible': {'autoscout24': 'E10-geeignet', 'mobile': None, 'otomoto': None},
+               'all_wheel_drive': {'autoscout24': 'Allrad', 'mobile': 'Allradantrieb', 'otomoto': None},
+               'front_wheel_drive': {'autoscout24': None, 'mobile': 'Frontantrieb', 'otomoto': None},
+               'rear_wheel_drive': {'autoscout24': None, 'mobile': 'Heckantrieb', 'otomoto': None},
+               'warranty': {'autoscout24': 'Garantie', 'mobile': 'Garantie', 'otomoto': None},
+               'export': {'autoscout24': None, 'mobile': 'export', 'otomoto': None},
+               'right_hand_drive': {'autoscout24': 'Rechtslenker', 'mobile': 'Rechtslenker', 'otomoto': 'rhd'},
+               'taxi': {'autoscout24': None, 'mobile': 'Taxi', 'otomoto': None},
+               'disabled_accessible': {'autoscout24': 'Behindertengerecht', 'mobile': 'Behindertengerecht',
+                                       'otomoto': None},
+               'smoker_package': {'autoscout24': 'Raucherpaket', 'mobile': 'Raucherpaket', 'otomoto': None},
+               'leather_interior': {'autoscout24': 'Lederausstattung', 'mobile': None, 'otomoto': None},
+               'paddle_shifters': {'autoscout24': 'Schaltwippen', 'mobile': 'Schaltwippen',
+                                   'otomoto': 'steering_wheel_with_gear_switches'},
+               'energy_recovery_system': {'autoscout24': None, 'mobile': None, 'otomoto': 'energy_recovery_system'},
+               'rear_transversal_curtain_airbag': {'autoscout24': None, 'mobile': None,
+                                                   'otomoto': 'rear_transversal_curtain_airbag'},
+               'leasing_concession': {'autoscout24': None, 'mobile': None, 'otomoto': 'leasing_concession'},
+               'lumbar_adjust_passenger_electric': {'autoscout24': None, 'mobile': None,
+                                                    'otomoto': 'lumbar_adjust_passenger_electric'},
+               'pause_recommendation_warning': {'autoscout24': None, 'mobile': None,
+                                                'otomoto': 'pause_recommendation_warning'},
+               'top_electrically_operated': {'autoscout24': None, 'mobile': None,
+                                             'otomoto': 'top_electrically_operated'},
+               'vat': {'autoscout24': None, 'mobile': None, 'otomoto': 'vat'},
+               'acoustic_vehicle_alerting_system': {'autoscout24': None, 'mobile': None,
+                                                    'otomoto': 'acoustic_vehicle_alerting_system'},
+               'has_vin': {'autoscout24': None, 'mobile': None, 'otomoto': 'has_vin'},
+               'property_updatedAt': {'autoscout24': None, 'mobile': None, 'otomoto': 'property_updatedAt'},
+               'convertible_top_type': {'autoscout24': None, 'mobile': None, 'otomoto': 'convertible_top_type'},
+               'electronic_controlled_suspension': {'autoscout24': None, 'mobile': None,
+                                                    'otomoto': 'electronic_controlled_suspension'},
+               'residual_value': {'autoscout24': None, 'mobile': None, 'otomoto': 'residual_value'},
+               'tyre_type': {'autoscout24': None, 'mobile': None, 'otomoto': 'tyre_type'},
+               'maker_warranty_valid_until_km': {'autoscout24': None, 'mobile': None,
+                                                 'otomoto': 'maker_warranty_valid_until_km'},
+               'battery_type': {'autoscout24': None, 'mobile': None, 'otomoto': 'battery_type'},
+               'front_airbags_for_rear_seats': {'autoscout24': None, 'mobile': None,
+                                                'otomoto': 'front_airbags_for_rear_seats'},
+               'city_emergency_brake_assist': {'autoscout24': None, 'mobile': None,
+                                               'otomoto': 'city_emergency_brake_assist'},
+               'cant_see_my_version': {'autoscout24': None, 'mobile': None, 'otomoto': 'cant_see_my_version'},
+               'vehicle_charging_cable': {'autoscout24': None, 'mobile': None, 'otomoto': 'vehicle_charging_cable'},
+               'vendors_warranty_valid_until_date': {'autoscout24': None, 'mobile': None,
+                                                     'otomoto': 'vendors_warranty_valid_until_date'},
+               'intersection_assist': {'autoscout24': None, 'mobile': None, 'otomoto': 'intersection_assist'},
+               'air_condition_rear': {'autoscout24': None, 'mobile': None, 'otomoto': 'air_condition_rear'},
+               'originalCreatedAt': {'autoscout24': None, 'mobile': None, 'otomoto': 'originalCreatedAt'},
+               'adjustable_suspension': {'autoscout24': None, 'mobile': None, 'otomoto': 'adjustable_suspension'},
+               'driver_conditioning_monitoring': {'autoscout24': None, 'mobile': None,
+                                                  'otomoto': 'driver_conditioning_monitoring'},
+               'maker_warranty_valid_until_date': {'autoscout24': None, 'mobile': None,
+                                                   'otomoto': 'maker_warranty_valid_until_date'},
+               'pre_crash_sound_system': {'autoscout24': None, 'mobile': None, 'otomoto': 'pre_crash_sound_system'},
+               'windscreenwiper_other': {'autoscout24': None, 'mobile': None, 'otomoto': 'windscreenwiper_other'},
+               'electric_power_peak': {'autoscout24': None, 'mobile': None, 'otomoto': 'electric_power_peak'},
+               'rear_pre_crash_system': {'autoscout24': None, 'mobile': None, 'otomoto': 'rear_pre_crash_system'},
+               'vat_discount': {'autoscout24': None, 'mobile': None, 'otomoto': 'vat_discount'},
+               'max_charging_power': {'autoscout24': None, 'mobile': None, 'otomoto': 'max_charging_power'},
+               'power_windows_rear': {'autoscout24': None, 'mobile': None, 'otomoto': 'power_windows_rear'},
+               'quick_charging_function': {'autoscout24': None, 'mobile': None, 'otomoto': 'quick_charging_function'},
+               'brake_energy_recovery': {'autoscout24': None, 'mobile': None, 'otomoto': 'brake_energy_recovery'},
+               'historical_vehicle': {'autoscout24': None, 'mobile': None, 'otomoto': 'historical_vehicle'},
+               'charging_connector_type': {'autoscout24': None, 'mobile': None, 'otomoto': 'charging_connector_type'},
+               'side_pre_crash_system': {'autoscout24': None, 'mobile': None, 'otomoto': 'side_pre_crash_system'},
+               'approval_for_goods': {'autoscout24': None, 'mobile': None, 'otomoto': 'approval_for_goods'},
+               'led_rear_lights': {'autoscout24': None, 'mobile': None, 'otomoto': 'led_rear_lights'},
+               'active_driver_conditioning_monitoring': {'autoscout24': None, 'mobile': None,
+                                                         'otomoto': 'active_driver_conditioning_monitoring'},
+               'is_imported_car': {'autoscout24': None, 'mobile': None, 'otomoto': 'is_imported_car'},
+               'system_performance_of_hybrid_driveline_in_hp': {'autoscout24': None, 'mobile': None,
+                                                                'otomoto': 'system_performance_of_hybrid_driveline_in_hp'},
+               'runflat_tyres': {'autoscout24': None, 'mobile': None, 'otomoto': 'runflat_tyres'},
+               'charging_time_home': {'autoscout24': None, 'mobile': None, 'otomoto': 'charging_time_home'},
+               'rear_cross_traffic_alert': {'autoscout24': None, 'mobile': None, 'otomoto': 'rear_cross_traffic_alert'},
+               'top_remote_controlled': {'autoscout24': None, 'mobile': None, 'otomoto': 'top_remote_controlled'},
+               'knee_airbag_driver': {'autoscout24': None, 'mobile': None, 'otomoto': 'knee_airbag_driver'},
+               'rear_seat_with_massage': {'autoscout24': None, 'mobile': None, 'otomoto': 'rear_seat_with_massage'},
+               'comfort_suspension': {'autoscout24': None, 'mobile': None, 'otomoto': 'comfort_suspension'},
+               'financial_option': {'autoscout24': None, 'mobile': None, 'otomoto': 'financial_option'},
+               'collision_warning_system': {'autoscout24': None, 'mobile': None, 'otomoto': 'collision_warning_system'},
+               'pre_crash_system': {'autoscout24': None, 'mobile': None, 'otomoto': 'pre_crash_system'},
+               'selectable_central_differential_characteristics': {'autoscout24': None, 'mobile': None,
+                                                                   'otomoto': 'selectable_central_differential_characteristics'},
+               'keyless_entry': {'autoscout24': None, 'mobile': None, 'otomoto': 'keyless_entry'},
+               'charging_current_type': {'autoscout24': None, 'mobile': None, 'otomoto': 'charging_current_type'},
+               'automatic_dimlight_activation': {'autoscout24': None, 'mobile': None,
+                                                 'otomoto': 'automatic_dimlight_activation'},
+               'knee_airbag_passenger': {'autoscout24': None, 'mobile': None, 'otomoto': 'knee_airbag_passenger'},
+               'front_seat_with_massage': {'autoscout24': None, 'mobile': None, 'otomoto': 'front_seat_with_massage'},
+               'pedestrian_emergency_brake_assist': {'autoscout24': None, 'mobile': None,
+                                                     'otomoto': 'pedestrian_emergency_brake_assist'},
+               'ceramic_composite_brakes': {'autoscout24': None, 'mobile': None, 'otomoto': 'ceramic_composite_brakes'},
+               'limited_slip_differential_in_general': {'autoscout24': None, 'mobile': None,
+                                                        'otomoto': 'limited_slip_differential_in_general'},
+               'ventilated_rear_seat': {'autoscout24': None, 'mobile': None, 'otomoto': 'ventilated_rear_seat'},
+               'lease_url': {'autoscout24': None, 'mobile': None, 'otomoto': 'lease_url'},
+               'autorenew': {'autoscout24': None, 'mobile': None, 'otomoto': 'autorenew'},
+               'number_engines': {'autoscout24': None, 'mobile': None, 'otomoto': 'number_engines'},
+               'leather_gearshifterswitch': {'autoscout24': None, 'mobile': None,
+                                             'otomoto': 'leather_gearshifterswitch'},
+               'remaining_payments': {'autoscout24': None, 'mobile': None, 'otomoto': 'remaining_payments'},
+               'active_lane_change_assistant': {'autoscout24': None, 'mobile': None,
+                                                'otomoto': 'active_lane_change_assistant'},
+               'distribution_of_braking_force_electronically': {'autoscout24': None, 'mobile': None,
+                                                                'otomoto': 'distribution_of_braking_force_electronically'},
+               'vehicle_title': {'autoscout24': None, 'mobile': None, 'otomoto': 'vehicle_title'},
+               'follow_me_home': {'autoscout24': None, 'mobile': None, 'otomoto': 'follow_me_home'},
+               'power_assisted_brakes': {'autoscout24': None, 'mobile': None, 'otomoto': 'power_assisted_brakes'},
+               'curve_trace_assistant': {'autoscout24': None, 'mobile': None, 'otomoto': 'curve_trace_assistant'},
+               'headlight_lamp_type': {'autoscout24': None, 'mobile': None, 'otomoto': 'headlight_lamp_type'},
+               'basic_autonomous_driving': {'autoscout24': None, 'mobile': None, 'otomoto': 'basic_autonomous_driving'},
+               'hill_descent_control': {'autoscout24': None, 'mobile': None, 'otomoto': 'hill_descent_control'},
+               'door_mirrors_heated': {'autoscout24': None, 'mobile': None, 'otomoto': 'door_mirrors_heated'},
+               'power_windows_front': {'autoscout24': None, 'mobile': None, 'otomoto': 'power_windows_front'},
+               'sunblind_type': {'autoscout24': None, 'mobile': None, 'otomoto': 'sunblind_type'},
+               'sports_steering_wheel': {'autoscout24': None, 'mobile': None, 'otomoto': 'sports_steering_wheel'},
+               'charging_time_80': {'autoscout24': None, 'mobile': None, 'otomoto': 'charging_time_80'},
+               'keyless_engine_start': {'autoscout24': None, 'mobile': None, 'otomoto': 'keyless_engine_start'},
+               'digital_key': {'autoscout24': None, 'mobile': None, 'otomoto': 'digital_key'},
+               'monthly_payment': {'autoscout24': None, 'mobile': None, 'otomoto': 'monthly_payment'},
+               'hydro_pneumatic_suspension': {'autoscout24': None, 'mobile': None,
+                                              'otomoto': 'hydro_pneumatic_suspension'},
+               'door_mirror_camera': {'autoscout24': None, 'mobile': None, 'otomoto': 'door_mirror_camera'},
+               'door_mirror_electrically_adjustable_in_general': {'autoscout24': None, 'mobile': None,
+                                                                  'otomoto': 'door_mirror_electrically_adjustable_in_general'},
+               'steering_wheel_electrically_adjustable': {'autoscout24': None, 'mobile': None,
+                                                          'otomoto': 'steering_wheel_electrically_adjustable'},
+               'catalog_urn': {'autoscout24': None, 'mobile': None, 'otomoto': 'catalog_urn'},
+               'battery_condition': {'autoscout24': None, 'mobile': None, 'otomoto': 'battery_condition'},
+               'central_airbag_driver_and_passenger': {'autoscout24': None, 'mobile': None,
+                                                       'otomoto': 'central_airbag_driver_and_passenger'},
+               'traffic_jam_assist': {'autoscout24': None, 'mobile': None, 'otomoto': 'traffic_jam_assist'},
+               'property_created_at': {'autoscout24': None, 'mobile': None, 'otomoto': 'property_created_at'},
+               'deactivation_reason_id': {'autoscout24': None, 'mobile': None, 'otomoto': 'deactivation_reason_id'},
+               'number_batteries': {'autoscout24': None, 'mobile': None, 'otomoto': 'number_batteries'},
+               'video': {'autoscout24': None, 'mobile': None, 'otomoto': 'video'},
+               'seat_belt_airbag_rear': {'autoscout24': None, 'mobile': None, 'otomoto': 'seat_belt_airbag_rear'},
+               'down_payment': {'autoscout24': None, 'mobile': None, 'otomoto': 'down_payment'},
+               'keyless_go': {'autoscout24': None, 'mobile': None, 'otomoto': 'keyless_go'},
+               'roll_over_protection_system': {'autoscout24': None, 'mobile': None,
+                                               'otomoto': 'roll_over_protection_system'}}
 
 
 def convert_vehicle_data(data, source='autoscout24'):
@@ -1341,8 +579,8 @@ def convert_vehicle_data(data, source='autoscout24'):
     Returns:
         dict: Unified vehicle data
     """
-    if source not in ['autoscout24', 'mobile']:
-        raise ValueError("Source must be 'autoscout24' or 'mobile'")
+    if source not in ['autoscout24', 'mobile', 'otomoto']:
+        raise ValueError("Source must be 'autoscout24' or 'mobile' or 'otomoto'")
 
     unified_data = {}
     unified_data['data_source'] = source  # Track origin
@@ -1361,5 +599,3 @@ def convert_vehicle_data(data, source='autoscout24'):
             unified_data[unified_key] = None
 
     return unified_data
-
-
