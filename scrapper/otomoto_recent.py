@@ -259,7 +259,7 @@ class OtomotoScraper:
             self.log.info(f"  ⭐ All {len(listings)} listings already in database")
             self.config.consective_no_data_page_count += 1
             return
-
+        self.config.consective_no_data_page_count = 0
         self.log.info(f"  📝 Found {len(new_listings)} new listings to fetch details")
 
         # Fetch details concurrently
