@@ -360,7 +360,7 @@ class OtomotoScraper:
         finally:
             # Mark unavailable listings
             elapsed_time = time.time() - start_time
-            self.db_obj.mark_unavailable_before(start_date, 'otomoto')
+            # self.db_obj.mark_unavailable_before(start_date, 'otomoto')
 
             # Print final statistics
             self.log.info(f"\n{'=' * 60}")

@@ -73,8 +73,14 @@ class VehicleDatabase:
                       'system_performance_of_hybrid_driveline_in_hp', 'charging_time_home', 'charging_current_type',
                       'lease_url', 'number_engines', 'remaining_payments', 'vehicle_title', 'headlight_lamp_type',
                       'sunblind_type', 'charging_time_80', 'monthly_payment', 'catalog_urn', 'battery_condition',
-                      'property_created_at', 'deactivation_reason_id', 'video', 'down_payment','alloy_wheels_type',
-                      'cruisecontrol_type','sunroof_type'
+                      'property_created_at', 'deactivation_reason_id', 'video', 'down_payment', 'alloy_wheels_type',
+                      'cruisecontrol_type', 'sunroof_type',
+                      # new marktplaats
+                      'tires', 'newCarPrice', 'rearBrakes', 'perKilometer', 'powerWheelDriver', 'hasNapStatus',
+                      'hybridType', 'firstRecordInNl', 'assurancesCars', 'ownerSince', 'perYear',
+                      'batteryFastChargeTime', 'acceleration', 'fuelPerMonth', 'energyLabel', 'carCapacityBootMinMax',
+                      'torque', 'totalCostPerMonth', 'repairAndMileage', 'euronormBE', 'topSpeed', 'frontBrakes',
+                      'enriched', 'lastOwnerType', 'dateApk'
                       ]
 
     BOOL_COLUMNS = ['particle_filter', 'new_inspection', 'service_book_maintained', 'non_smoking_vehicle',
@@ -131,7 +137,10 @@ class VehicleDatabase:
                     'hydro_pneumatic_suspension', 'door_mirror_camera',
                     'door_mirror_electrically_adjustable_in_general', 'steering_wheel_electrically_adjustable',
                     'central_airbag_driver_and_passenger', 'traffic_jam_assist', 'number_batteries',
-                    'seat_belt_airbag_rear', 'keyless_go', 'roll_over_protection_system'
+                    'seat_belt_airbag_rear', 'keyless_go', 'roll_over_protection_system',
+                    # new marktplaats
+                    'camera_360', 'Metallic_lak', 'forward_camera', 'Head_up_Display', 'heated_mirror',
+                    'reversing_camera', 'isTurbo'
                     ]
 
     def __init__(self, logger, schema_name: str = "vehicle_marketplace", table_name: str = "vehicle_data"):
